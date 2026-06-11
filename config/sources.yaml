@@ -10,14 +10,12 @@ sources:
     timeout: 120
     retry: 3
 
-  - id: xmltv_au
-    name: "xmltv.net Australia"
-    url: "https://xmltv.net/xml_files/Australia.xml"
-    country: AU
-    priority: 2
-    enabled: true
-    timeout: 120
-    retry: 2
+  # xmltv.net AU returns non-XML content (HTTP 200 HTML page) — disabled
+  # - id: xmltv_au
+  #   url: "https://xmltv.net/xml_files/Australia.xml"
+  #   country: AU
+  #   priority: 2
+  #   enabled: false
 
   # ── United Kingdom ─────────────────────────────────────────────────────────
   - id: epg_pw_gb
@@ -29,14 +27,12 @@ sources:
     timeout: 120
     retry: 3
 
-  - id: xmltv_gb
-    name: "xmltv.net United Kingdom"
-    url: "https://xmltv.net/xml_files/United_Kingdom.xml"
-    country: GB
-    priority: 2
-    enabled: true
-    timeout: 120
-    retry: 2
+  # xmltv.net GB returns non-XML content — disabled
+  # - id: xmltv_gb
+  #   url: "https://xmltv.net/xml_files/United_Kingdom.xml"
+  #   country: GB
+  #   priority: 2
+  #   enabled: false
 
   # ── United States ──────────────────────────────────────────────────────────
   - id: epg_pw_us
@@ -48,14 +44,12 @@ sources:
     timeout: 300
     retry: 3
 
-  - id: xmltv_us
-    name: "xmltv.net United States"
-    url: "https://xmltv.net/xml_files/United_States.xml"
-    country: US
-    priority: 2
-    enabled: true
-    timeout: 300
-    retry: 2
+  # xmltv.net US returns non-XML content — disabled
+  # - id: xmltv_us
+  #   url: "https://xmltv.net/xml_files/United_States.xml"
+  #   country: US
+  #   priority: 2
+  #   enabled: false
 
   # ── Canada ─────────────────────────────────────────────────────────────────
   - id: epg_pw_ca
@@ -67,111 +61,95 @@ sources:
     timeout: 120
     retry: 3
 
-  - id: xmltv_ca
-    name: "xmltv.net Canada"
-    url: "https://xmltv.net/xml_files/Canada.xml"
-    country: CA
-    priority: 2
-    enabled: true
-    timeout: 120
-    retry: 2
-
-  # ── Hungary ────────────────────────────────────────────────────────────────
-  - id: epg_pw_hu
-    name: "epg.pw Hungary"
-    url: "https://epg.pw/xmltv/epg_HU.xml"
-    country: HU
-    priority: 1
-    enabled: true
-    timeout: 120
-    retry: 3
-
-  - id: rytec_hu
-    name: "Rytec Hungary"
-    url: "https://github.com/sunsettrack4/schedule_sources/raw/main/epg/hu_epg.xml"
-    country: HU
-    priority: 2
-    enabled: true
-    timeout: 120
-    retry: 2
-
-  # ── Serbia ─────────────────────────────────────────────────────────────────
-  - id: epg_pw_rs
-    name: "epg.pw Serbia"
-    url: "https://epg.pw/xmltv/epg_RS.xml"
-    country: RS
-    priority: 1
-    enabled: true
-    timeout: 120
-    retry: 3
-
-  # ── Croatia ────────────────────────────────────────────────────────────────
-  - id: epg_pw_hr
-    name: "epg.pw Croatia"
-    url: "https://epg.pw/xmltv/epg_HR.xml"
-    country: HR
-    priority: 1
-    enabled: true
-    timeout: 120
-    retry: 3
+  # xmltv.net CA returns non-XML content — disabled
+  # - id: xmltv_ca
+  #   url: "https://xmltv.net/xml_files/Canada.xml"
+  #   country: CA
+  #   priority: 2
+  #   enabled: false
 
   # ── Italy ──────────────────────────────────────────────────────────────────
-  - id: epg_pw_it
-    name: "epg.pw Italy"
-    url: "https://epg.pw/xmltv/epg_IT.xml"
-    country: IT
-    priority: 1
-    enabled: true
-    timeout: 180
-    retry: 3
-
-  - id: xmltv_it
-    name: "xmltv.net Italy"
-    url: "https://xmltv.net/xml_files/Italy.xml"
-    country: IT
-    priority: 2
-    enabled: true
-    timeout: 180
-    retry: 2
+  # epg.pw IT returned non-XML content (HTTP 200 but HTML error page) — disabled
+  # - id: epg_pw_it
+  #   url: "https://epg.pw/xmltv/epg_IT.xml"
+  #   country: IT
+  #   priority: 1
+  #   enabled: false
+  #
+  # Candidate replacement — verify URL before enabling:
+  # - id: iptv_org_it
+  #   name: "iptv-org Italy"
+  #   url: "https://raw.githubusercontent.com/iptv-org/epg/gh-pages/guides/it/epg.xml"
+  #   country: IT
+  #   priority: 1
+  #   enabled: false
+  #   timeout: 120
+  #   retry: 3
 
   # ── Spain ──────────────────────────────────────────────────────────────────
-  - id: epg_pw_es
-    name: "epg.pw Spain"
-    url: "https://epg.pw/xmltv/epg_ES.xml"
-    country: ES
-    priority: 1
-    enabled: true
-    timeout: 180
-    retry: 3
+  # epg.pw ES returned non-XML content — disabled
+  # - id: epg_pw_es
+  #   url: "https://epg.pw/xmltv/epg_ES.xml"
+  #   country: ES
+  #   priority: 1
+  #   enabled: false
+  #
+  # Candidate replacement — verify URL before enabling:
+  # - id: iptv_org_es
+  #   name: "iptv-org Spain"
+  #   url: "https://raw.githubusercontent.com/iptv-org/epg/gh-pages/guides/es/epg.xml"
+  #   country: ES
+  #   priority: 1
+  #   enabled: false
+  #   timeout: 120
+  #   retry: 3
 
-  - id: xmltv_es
-    name: "xmltv.net Spain"
-    url: "https://xmltv.net/xml_files/Spain.xml"
-    country: ES
-    priority: 2
-    enabled: true
-    timeout: 180
-    retry: 2
+  # ── Hungary ────────────────────────────────────────────────────────────────
+  # epg.pw HU returned non-XML content — disabled
+  # - id: epg_pw_hu
+  #   url: "https://epg.pw/xmltv/epg_HU.xml"
+  #   country: HU
+  #   priority: 1
+  #   enabled: false
+  #
+  # Rytec HU — returned non-XML content — disabled
+  # - id: rytec_hu
+  #   url: "https://github.com/sunsettrack4/schedule_sources/raw/main/epg/hu_epg.xml"
+  #   country: HU
+  #   priority: 2
+  #   enabled: false
+
+  # ── Serbia ─────────────────────────────────────────────────────────────────
+  # epg.pw RS returned non-XML content — disabled
+  # - id: epg_pw_rs
+  #   url: "https://epg.pw/xmltv/epg_RS.xml"
+  #   country: RS
+  #   priority: 1
+  #   enabled: false
+
+  # ── Croatia ────────────────────────────────────────────────────────────────
+  # epg.pw HR returned non-XML content — disabled
+  # - id: epg_pw_hr
+  #   url: "https://epg.pw/xmltv/epg_HR.xml"
+  #   country: HR
+  #   priority: 1
+  #   enabled: false
 
   # ── Greece ─────────────────────────────────────────────────────────────────
-  - id: epg_pw_gr
-    name: "epg.pw Greece"
-    url: "https://epg.pw/xmltv/epg_GR.xml"
-    country: GR
-    priority: 1
-    enabled: true
-    timeout: 120
-    retry: 3
+  # epg.pw GR returned non-XML content — disabled
+  # - id: epg_pw_gr
+  #   url: "https://epg.pw/xmltv/epg_GR.xml"
+  #   country: GR
+  #   priority: 1
+  #   enabled: false
 
   # ── Montenegro ─────────────────────────────────────────────────────────────
-  - id: epg_pw_me
-    name: "epg.pw Montenegro"
-    url: "https://epg.pw/xmltv/epg_ME.xml"
-    country: ME
-    priority: 1
-    enabled: true
-    timeout: 120
-    retry: 3
+  # epg.pw ME returned non-XML content — disabled
+  # - id: epg_pw_me
+  #   url: "https://epg.pw/xmltv/epg_ME.xml"
+  #   country: ME
+  #   priority: 1
+  #   enabled: false
 
 output:
   combined_filename: epg.xml.gz

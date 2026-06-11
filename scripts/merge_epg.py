@@ -235,6 +235,14 @@ def download_source(
             if etag or last_mod:
                 cache.save_meta(source.id, etag, last_mod)
 
+            # Validate it's actually XML (not an HTML error page served as HTTP 200)
+            if not _is_xml(xml_path):
+                snippet = xml_path.read_bytes()[:120]
+                LOG.warning("[%s] downloaded content is not XML: %r", source.id, snippet)
+                xml_path.unlink(missing_ok=True)
+                last_error = "response was not valid XML"
+                continue
+
             LOG.info("[%s] downloaded %.1fMB", source.id, xml_path.stat().st_size / 1e6)
             return SourceResult(source=source, file_path=xml_path, cached=False, status="ok")
 
@@ -255,6 +263,16 @@ def _is_gzip(path: Path) -> bool:
     try:
         with open(path, "rb") as f:
             return f.read(2) == b"\x1f\x8b"
+    except Exception:
+        return False
+
+
+def _is_xml(path: Path) -> bool:
+    """Check that the file starts with an XML declaration or a known XMLTV root tag."""
+    try:
+        with open(path, "rb") as f:
+            header = f.read(256).lstrip()
+        return header.startswith(b"<?xml") or header.startswith(b"<tv")
     except Exception:
         return False
 
@@ -702,11 +720,16 @@ def main() -> int:
         output_dir / "index.html",
     )
 
-    # Summary
+    # Summary — warn about failures but only hard-fail if combined output is empty
     failed = [r for r in source_results if r.status == "failed" and not r.cached]
     if failed:
-        LOG.warning("Failed sources: %s", [r.source.id for r in failed])
+        LOG.warning("Failed sources (skipped): %s", [r.source.id for r in failed])
+
+    combined_entry = next((f for f in output_files if f["filename"] == output_cfg.combined_filename), None)
+    if combined_entry and combined_entry["channels"] == 0:
+        LOG.error("Combined output has 0 channels — all sources failed")
         return 1
+
     LOG.info("Done. Output written to %s/", output_dir)
     return 0
 
