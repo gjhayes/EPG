@@ -6,22 +6,23 @@ Automatically aggregates XMLTV Electronic Program Guide data from multiple sourc
 
 | Country | Sources |
 |---|---|
-| Australia | epg.pw (FTA + Foxtel/pay-TV), xmltv.net |
-| United Kingdom | epg.pw, xmltv.net |
-| United States | epg.pw, xmltv.net |
-| Canada | epg.pw, xmltv.net |
-| Hungary | epg.pw, Rytec |
-| Serbia | epg.pw |
-| Croatia | epg.pw |
-| Italy | epg.pw, xmltv.net |
-| Spain | epg.pw, xmltv.net |
-| Greece | epg.pw |
-| Montenegro | epg.pw |
+| Australia | epg.pw (FTA + Foxtel/pay-TV) |
+| United Kingdom | epg.pw |
+| United States | epg.pw |
+| Canada | epg.pw |
 
-## TiviMate Setup
+## TiviMate / IPTV App Setup
 
-1. Open TiviMate → **Settings** → **EPG Sources** → **Add**
-2. Paste this URL:
+Both plain XML and gzip-compressed versions are published — use whichever your app supports.
+
+1. Open your IPTV app → **EPG Sources** → **Add**
+2. Paste this URL (plain XML, works in all apps):
+
+```
+https://gjhayes.github.io/EPG/epg.xml
+```
+
+Or the gzip version if your app supports it (smaller download):
 
 ```
 https://gjhayes.github.io/EPG/epg.xml.gz
@@ -30,21 +31,14 @@ https://gjhayes.github.io/EPG/epg.xml.gz
 3. Set the refresh interval to **12 hours** or **daily**
 4. Force a refresh — TiviMate will download and index all channels
 
-Individual country files (smaller downloads):
+Individual country files:
 
-| Country | URL |
-|---|---|
-| Australia | `https://gjhayes.github.io/EPG/epg_AU.xml.gz` |
-| United Kingdom | `https://gjhayes.github.io/EPG/epg_GB.xml.gz` |
-| United States | `https://gjhayes.github.io/EPG/epg_US.xml.gz` |
-| Canada | `https://gjhayes.github.io/EPG/epg_CA.xml.gz` |
-| Hungary | `https://gjhayes.github.io/EPG/epg_HU.xml.gz` |
-| Serbia | `https://gjhayes.github.io/EPG/epg_RS.xml.gz` |
-| Croatia | `https://gjhayes.github.io/EPG/epg_HR.xml.gz` |
-| Italy | `https://gjhayes.github.io/EPG/epg_IT.xml.gz` |
-| Spain | `https://gjhayes.github.io/EPG/epg_ES.xml.gz` |
-| Greece | `https://gjhayes.github.io/EPG/epg_GR.xml.gz` |
-| Montenegro | `https://gjhayes.github.io/EPG/epg_ME.xml.gz` |
+| Country | Plain XML | Gzip |
+|---|---|---|
+| Australia | `https://gjhayes.github.io/EPG/epg_AU.xml` | `epg_AU.xml.gz` |
+| United Kingdom | `https://gjhayes.github.io/EPG/epg_GB.xml` | `epg_GB.xml.gz` |
+| United States | `https://gjhayes.github.io/EPG/epg_US.xml` | `epg_US.xml.gz` |
+| Canada | `https://gjhayes.github.io/EPG/epg_CA.xml` | `epg_CA.xml.gz` |
 
 ## Channel ID Troubleshooting
 
