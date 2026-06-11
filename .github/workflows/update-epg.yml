@@ -65,6 +65,14 @@ jobs:
           path: scripts/.cache
           key: epg-sources-v1-${{ runner.os }}-${{ github.run_id }}
 
+      - name: Decompress EPG files for apps that don't support gzip
+        run: |
+          cd output
+          for f in *.xml.gz; do
+            [ -f "$f" ] || continue
+            gzip -dk "$f"
+          done
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
