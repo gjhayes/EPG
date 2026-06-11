@@ -1,0 +1,21 @@
+# Channel ID alias mappings for TiviMate compatibility
+#
+# If your strong8k M3U uses different tvg-id values than the epg.pw numeric IDs
+# in this EPG, add them here. Each alias generates a duplicate <channel> entry
+# and duplicate <programme> entries in the output so TiviMate can match either.
+#
+# How to find your M3U's tvg-ids:
+#   1. Download the M3U playlist from strong8k
+#   2. Search for tvg-id= attributes (e.g. tvg-id="3474" or tvg-id="ABCNews.au")
+#   3. Cross-reference with <channel id="..."> values in epg_AU.xml.gz etc.
+#   4. Add any mismatches below
+#
+# Format: {alternate_id: epg_pw_numeric_id}
+#
+# Example:
+# mappings:
+#   "ABCNews.au": "3474"
+#   "Channel9.au": "3501"
+#   "FoxSports1.au": "3520"
+
+mappings: {}

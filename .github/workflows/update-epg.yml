@@ -1,0 +1,77 @@
+name: Update EPG Data
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      force_download:
+        description: 'Force re-download all sources (bypass ETag cache)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+concurrency:
+  group: epg-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Restore EPG source cache
+        uses: actions/cache/restore@v4
+        id: epg-cache
+        with:
+          path: scripts/.cache
+          key: epg-sources-v1-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            epg-sources-v1-${{ runner.os }}-
+
+      - name: Run EPG aggregator
+        run: |
+          python scripts/merge_epg.py \
+            --config config/sources.yaml \
+            --channel-map config/channel_map.yaml \
+            --output-dir ./output \
+            --cache-dir scripts/.cache \
+            --log-level INFO
+        env:
+          FORCE_DOWNLOAD: ${{ inputs.force_download }}
+
+      - name: Save EPG source cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: scripts/.cache
+          key: epg-sources-v1-${{ runner.os }}-${{ github.run_id }}
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./output
+          commit_message: 'chore: auto-update EPG data [skip ci]'
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          enable_jekyll: false
+          force_orphan: false
