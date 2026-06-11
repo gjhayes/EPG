@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPG Status</title>
+<style>
+body{font-family:sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem}
+h1{color:#333}
+table{border-collapse:collapse;width:100%;margin-bottom:2rem}
+th,td{border:1px solid #ddd;padding:.5rem .75rem;text-align:left}
+th{background:#f5f5f5}
+tr.ok td{color:#2d7d2d}
+tr.fail td{color:#c0392b}
+.url-box{background:#f0f0f0;padding:.75rem 1rem;border-radius:4px;font-family:monospace;word-break:break-all}
+</style>
+</head>
+<body>
+<h1>EPG Aggregator</h1>
+<p>Last updated: <strong>2026-06-11 14:53:42 UTC</strong></p>
+
+<h2>TiviMate Setup</h2>
+<p>In TiviMate: <em>Settings → EPG Sources → Add</em> and paste this URL:</p>
+<div class="url-box">https://gjhayes.github.io/EPG/epg.xml.gz</div>
+<p>Or use individual country files below for a smaller download.</p>
+
+<h2>Output Files</h2>
+<table>
+<tr><th>File</th><th>Channels</th><th>Programmes</th><th>Size</th></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg.xml.gz">epg.xml.gz</a></td><td>7,131</td><td>547,677</td><td>2.7 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_AU.xml.gz">epg_AU.xml.gz</a></td><td>218</td><td>23,954</td><td>0.1 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_CA.xml.gz">epg_CA.xml.gz</a></td><td>696</td><td>51,339</td><td>0.3 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_GB.xml.gz">epg_GB.xml.gz</a></td><td>761</td><td>52,932</td><td>0.3 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_US.xml.gz">epg_US.xml.gz</a></td><td>5,456</td><td>419,452</td><td>2.0 MB</td></tr>
+
+</table>
+
+<h2>Source Health</h2>
+<table>
+<tr><th>Source</th><th>Country</th><th>Status</th><th>Channels</th><th>Error</th></tr>
+<tr class="ok"><td>epg_pw_au</td><td>AU</td><td>ok</td><td>218</td><td></td></tr>
+<tr class="ok"><td>epg_pw_gb</td><td>GB</td><td>ok</td><td>761</td><td></td></tr>
+<tr class="ok"><td>epg_pw_ca</td><td>CA</td><td>ok</td><td>696</td><td></td></tr>
+<tr class="ok"><td>epg_pw_us</td><td>US</td><td>ok</td><td>5,456</td><td></td></tr>
+
+</table>
+</body>
+</html>
