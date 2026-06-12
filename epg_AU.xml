@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tv date="20260611200919 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
+<tv date="20260612023044 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
   <channel id="3264">
     <display-name lang="AU">9Life</display-name>
     <icon src="https://epg.pw/media/images/epg/2024/06/09/20240609083555307702_14.png" />
