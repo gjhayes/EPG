@@ -81,6 +81,9 @@ jobs:
               rm -f "$plain"
             fi
           done
+          # Publish common name aliases so apps using non-ISO codes still work
+          [ -f epg_GB.xml.gz ] && cp epg_GB.xml.gz epg_UK.xml.gz
+          [ -f epg_GB.xml ]    && cp epg_GB.xml    epg_UK.xml
           echo "Published files:"; ls -lh
 
       - name: Deploy to GitHub Pages
