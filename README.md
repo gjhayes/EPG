@@ -13,20 +13,16 @@ Automatically aggregates XMLTV Electronic Program Guide data from multiple sourc
 
 ## TiviMate / IPTV App Setup
 
-Both plain XML and gzip-compressed versions are published — use whichever your app supports.
-
 1. Open your IPTV app → **EPG Sources** → **Add**
-2. Paste this URL (plain XML, works in all apps):
-
-```
-https://gjhayes.github.io/EPG/epg.xml
-```
-
-Or the gzip version if your app supports it (smaller download):
+2. Paste this URL (gzip — works in TiviMate and most apps):
 
 ```
 https://gjhayes.github.io/EPG/epg.xml.gz
 ```
+
+The combined feed is published gzip-only (the uncompressed file exceeds
+GitHub's 100MB limit). Per-country files are also published as plain XML for
+apps that can't read gzip — see the table below.
 
 3. Set the refresh interval to **12 hours** or **daily**
 4. Force a refresh — TiviMate will download and index all channels
