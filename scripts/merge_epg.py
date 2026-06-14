@@ -378,27 +378,31 @@ def stream_programmes_to_file(
     """Stream <programme> elements from source_path to out for valid channels."""
     count = 0
     try:
-        context = ET.iterparse(str(source_path), events=("end",))
+        # Use start+end events so we can grab the root and clear it after each
+        # programme. We must NOT clear child elements (title/desc/etc) on their
+        # own "end" event, or their text would be wiped before the parent
+        # <programme> is serialised.
+        context = ET.iterparse(str(source_path), events=("start", "end"))
+        _, root = next(context)
         for event, elem in context:
-            if elem.tag != "programme":
-                elem.clear()
+            if event != "end" or elem.tag != "programme":
                 continue
 
             channel_id = elem.get("channel", "").strip()
             start = elem.get("start", "").strip()
 
             if channel_id not in valid_channel_ids:
-                elem.clear()
+                root.clear()
                 continue
 
             key = (channel_id, start)
             if key in seen_set:
-                elem.clear()
+                root.clear()
                 continue
             seen_set.add(key)
 
             # Serialise the programme element preserving all child content
-            prog_xml = ET.tostring(elem, encoding="unicode")
+            prog_xml = ET.tostring(elem, encoding="unicode").strip()
             out.write("  " + prog_xml + "\n")
             count += 1
 
@@ -415,6 +419,9 @@ def stream_programmes_to_file(
                     )
                     out.write("  " + alt_xml + "\n")
                     count += 1
+
+            # Drop all accumulated elements from the root to keep memory flat
+            root.clear()
 
             elem.clear()
     except ET.ParseError as e:
