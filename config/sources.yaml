@@ -9,6 +9,7 @@ sources:
     enabled: true
     timeout: 120
     retry: 3
+    time_shift_hours: -8
 
   # xmltv.net AU returns non-XML content (HTTP 200 HTML page) — disabled
   # - id: xmltv_au
@@ -26,6 +27,7 @@ sources:
     enabled: true
     timeout: 120
     retry: 3
+    time_shift_hours: -8
 
   # xmltv.net GB returns non-XML content — disabled
   # - id: xmltv_gb
@@ -43,6 +45,7 @@ sources:
     enabled: true
     timeout: 300
     retry: 3
+    time_shift_hours: -8
 
   # xmltv.net US returns non-XML content — disabled
   # - id: xmltv_us
@@ -60,6 +63,7 @@ sources:
     enabled: true
     timeout: 120
     retry: 3
+    time_shift_hours: -8
 
   # xmltv.net CA returns non-XML content — disabled
   # - id: xmltv_ca

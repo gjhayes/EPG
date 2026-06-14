@@ -14,7 +14,7 @@ import time
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -36,6 +36,7 @@ class SourceConfig:
     enabled: bool
     timeout: int
     retry: int
+    time_shift_hours: int = 0
 
 
 @dataclass
@@ -98,6 +99,7 @@ def load_config(
             enabled=s.get("enabled", True),
             timeout=s.get("timeout", 120),
             retry=s.get("retry", 3),
+            time_shift_hours=s.get("time_shift_hours", 0),
         )
         for s in cfg.get("sources", [])
         if s.get("enabled", True)
@@ -368,12 +370,27 @@ def _esc(s: str) -> str:
     )
 
 
+def _shift_xmltv_time(ts: str, hours: int) -> str:
+    """Shift an XMLTV timestamp string (YYYYMMDDHHmmss +HHMM) by whole hours."""
+    if not ts or not hours:
+        return ts
+    ts = ts.strip()
+    dt_part = ts[:14]
+    tz_part = ts[14:].strip() or "+0000"
+    try:
+        dt = datetime.strptime(dt_part, "%Y%m%d%H%M%S") + timedelta(hours=hours)
+        return dt.strftime("%Y%m%d%H%M%S") + " " + tz_part
+    except ValueError:
+        return ts
+
+
 def stream_programmes_to_file(
     source_path: Path,
     out,
     valid_channel_ids: Set[str],
     seen_set: Set[Tuple[str, str]],
     alias_reverse: Dict[str, List[str]],
+    time_shift_hours: int = 0,
 ) -> int:
     """Stream <programme> elements from source_path to out for valid channels."""
     count = 0
@@ -394,6 +411,14 @@ def stream_programmes_to_file(
             if channel_id not in valid_channel_ids:
                 root.clear()
                 continue
+
+            # Apply time shift before dedup so keys reflect actual broadcast time
+            if time_shift_hours:
+                start = _shift_xmltv_time(start, time_shift_hours)
+                elem.set("start", start)
+                stop = elem.get("stop", "").strip()
+                if stop:
+                    elem.set("stop", _shift_xmltv_time(stop, time_shift_hours))
 
             key = (channel_id, start)
             if key in seen_set:
@@ -478,7 +503,8 @@ def write_xmltv_output(
             if country_filter and result.source.country != country_filter:
                 continue
             n = stream_programmes_to_file(
-                result.file_path, out, valid_ids, seen_set, alias_reverse
+                result.file_path, out, valid_ids, seen_set, alias_reverse,
+                time_shift_hours=result.source.time_shift_hours,
             )
             result.programme_count += n
             total_programmes += n
