@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-06-14 13:26:22 UTC",
+  "generated_at": "2026-06-14 19:07:29 UTC",
   "sources": [
-    {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
-      "status": "cached",
-      "channels": 218,
-      "programmes": 59022,
-      "cached": true,
-      "error": ""
-    },
     {
       "id": "epg_pw_us",
       "name": "epg.pw United States",
@@ -38,6 +28,16 @@
       "status": "cached",
       "channels": 695,
       "programmes": 114406,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
+      "status": "cached",
+      "channels": 218,
+      "programmes": 59022,
       "cached": true,
       "error": ""
     }
