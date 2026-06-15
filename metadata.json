@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-14 19:07:29 UTC",
+  "generated_at": "2026-06-15 02:39:54 UTC",
   "sources": [
     {
       "id": "epg_pw_us",
@@ -15,30 +15,30 @@
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
       "country": "GB",
-      "status": "cached",
+      "status": "ok",
       "channels": 760,
-      "programmes": 133542,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_ca",
-      "name": "epg.pw Canada",
-      "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 114406,
-      "cached": true,
+      "programmes": 107170,
+      "cached": false,
       "error": ""
     },
     {
       "id": "epg_pw_au",
       "name": "epg.pw Australia",
       "country": "AU",
-      "status": "cached",
+      "status": "ok",
       "channels": 218,
-      "programmes": 59022,
-      "cached": true,
+      "programmes": 58972,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_ca",
+      "name": "epg.pw Canada",
+      "country": "CA",
+      "status": "ok",
+      "channels": 695,
+      "programmes": 75944,
+      "cached": false,
       "error": ""
     }
   ],
@@ -46,32 +46,32 @@
     {
       "filename": "epg.xml.gz",
       "channels": 7595,
-      "programmes": 705975,
-      "size_mb": 36.5
+      "programmes": 673533,
+      "size_mb": 35.14
     },
     {
       "filename": "epg_AU.xml.gz",
       "channels": 257,
-      "programmes": 29511,
+      "programmes": 29486,
       "size_mb": 0.87
     },
     {
       "filename": "epg_CA.xml.gz",
       "channels": 789,
-      "programmes": 57203,
-      "size_mb": 2.73
+      "programmes": 37972,
+      "size_mb": 1.87
     },
     {
       "filename": "epg_GB.xml.gz",
       "channels": 969,
-      "programmes": 66771,
-      "size_mb": 2.81
+      "programmes": 53585,
+      "size_mb": 2.29
     },
     {
       "filename": "epg_US.xml.gz",
       "channels": 5580,
       "programmes": 552490,
-      "size_mb": 30.09
+      "size_mb": 30.12
     }
   ]
 }
