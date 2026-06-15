@@ -18,8 +18,11 @@ sources:
     priority: 1
     enabled: true
     timeout: 180
-    retry: 3
+    retry: 2
     time_shift_hours: 0
+    # Xtream panels often return an empty body to unknown clients; present a
+    # media-player UA so the EPG endpoint responds.
+    user_agent: "VLC/3.0.20 LibVLC/3.0.20"
 
   # ── Australia ──────────────────────────────────────────────────────────────
   - id: epg_pw_au

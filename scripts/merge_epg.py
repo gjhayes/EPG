@@ -39,6 +39,7 @@ class SourceConfig:
     retry: int
     time_shift_hours: int = 0
     multi_country: bool = False
+    user_agent: Optional[str] = None
 
 
 @dataclass
@@ -133,6 +134,7 @@ def load_config(
             retry=s.get("retry", 3),
             time_shift_hours=s.get("time_shift_hours", 0),
             multi_country=s.get("multi_country", False),
+            user_agent=s.get("user_agent"),
         ))
 
     out = cfg.get("output", {})
@@ -213,6 +215,11 @@ def download_source(
         headers["If-None-Match"] = meta["etag"]
     if meta.get("last_modified"):
         headers["If-Modified-Since"] = meta["last_modified"]
+    # Some providers (e.g. Xtream panels) gate their EPG endpoint on
+    # User-Agent and return an empty 200 body to unrecognised clients, so
+    # allow a per-source override that mimics a media player.
+    if source.user_agent:
+        headers["User-Agent"] = source.user_agent
 
     last_error = ""
     for attempt in range(source.retry + 1):
@@ -269,10 +276,19 @@ def download_source(
 
             # Validate it's actually XML (not an HTML error page served as HTTP 200)
             if not _is_xml(xml_path):
-                snippet = xml_path.read_bytes()[:120]
-                LOG.warning("[%s] downloaded content is not XML: %r", source.id, snippet)
+                size = xml_path.stat().st_size if xml_path.exists() else 0
+                if size == 0:
+                    LOG.warning(
+                        "[%s] empty 200 response — server likely blocked this "
+                        "User-Agent or IP (set a player user_agent for this source)",
+                        source.id,
+                    )
+                    last_error = "empty response (0 bytes)"
+                else:
+                    snippet = xml_path.read_bytes()[:120]
+                    LOG.warning("[%s] downloaded content is not XML: %r", source.id, snippet)
+                    last_error = "response was not valid XML"
                 xml_path.unlink(missing_ok=True)
-                last_error = "response was not valid XML"
                 continue
 
             LOG.info("[%s] downloaded %.1fMB", source.id, xml_path.stat().st_size / 1e6)
