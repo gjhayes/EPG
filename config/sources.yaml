@@ -52,6 +52,57 @@ sources:
     timeout: 120
     retry: 3
     time_shift_hours: -8
+    # epg.pw's 12xxx-series channel IDs carry an extra 8-hour lag on top of
+    # the base 8-hour offset that affects the 486xxx/9xxx series — so channels
+    # in this range need −16 h total (base −8 h + the −8 h below).
+    per_channel_shifts:
+      "12020": -8   # Colors.uk
+      "12021": -8   # GOLD.uk
+      "12024": -8   # SkyAction.uk / SkySportsAction.uk
+      "12067": -8   # StartTV.us
+      "12069": -8   # SkyNews.uk
+      "12084": -8   # Nickelodeon.uk/.ca/.us
+      "12090": -8   # W.uk
+      "12094": -8   # Drama.uk
+      "12111": -8   # Film4.uk
+      "12117": -8   # BBCParliament.uk
+      "12121": -8   # SkyReplay.uk
+      "12135": -8   # SkyArts.uk
+      "12140": -8   # SkyMax.uk
+      "12164": -8   # More4.uk
+      "12178": -8   # FiveUSA.uk
+      "12185": -8   # DiscoveryLife.us
+      "12188": -8   # SkyNature.uk
+      "12190": -8   # SkySportsF1.uk
+      "12191": -8   # SkySportsFootball.uk / SkySportsPremiereLeague.uk
+      "12195": -8   # SkyKids.uk
+      "12200": -8   # SkySportsRacing.uk
+      "12220": -8   # Alibi.uk
+      "12221": -8   # Eden.uk
+      "12223": -8   # SkySportsNews.uk
+      "12239": -8   # SkyDocumentaries.uk
+      "12250": -8   # BBCOneWales.uk
+      "12252": -8   # BBCTwoWales.uk
+      "12258": -8   # MUTV.uk
+      "12306": -8   # SkySportsMainEvent.uk
+      "12317": -8   # CBSReality.uk
+      "12322": -8   # SkyComedy.uk
+      "12358": -8   # SkySportsArena.uk
+      "12366": -8   # SkyAtlantic.uk
+      "12373": -8   # RealityXtra.uk
+      "12379": -8   # BBCOneEastMidlands.uk
+      "12385": -8   # BBCOneNorthWest/Oxford/SouthEast/WestMidlands.uk
+      "12404": -8   # SkyCrime.uk
+      "12496": -8   # NickJunior.uk
+      "12504": -8   # BBCAlba.uk
+      "12505": -8   # BBCScotland.uk
+      "12506": -8   # SonyMax.uk
+      "12518": -8   # SkyWitness.uk
+      "12534": -8   # RacingUK.uk
+      "12544": -8   # E4.uk
+      "12559": -8   # MTV.ca/.us / MTV2.ca/.us / KMTV.us
+      "12563": -8   # SkySportsMix.uk
+      "12565": -8   # NatGeo.uk/.ca/.us
 
   # xmltv.net GB returns non-XML content — disabled
   # - id: xmltv_gb
@@ -70,6 +121,12 @@ sources:
     timeout: 300
     retry: 3
     time_shift_hours: -8
+    per_channel_shifts:
+      "12067": -8   # StartTV.us
+      "12084": -8   # Nickelodeon.us
+      "12185": -8   # DiscoveryLife.us
+      "12559": -8   # MTV.us / MTV2.us / KMTV.us
+      "12565": -8   # NatGeo.us
 
   # xmltv.net US returns non-XML content — disabled
   # - id: xmltv_us
@@ -88,6 +145,10 @@ sources:
     timeout: 120
     retry: 3
     time_shift_hours: -8
+    per_channel_shifts:
+      "12084": -8   # Nickelodeon.ca
+      "12559": -8   # MTV.ca / MTV2.ca
+      "12565": -8   # NatGeo.ca
 
   # xmltv.net CA returns non-XML content — disabled
   # - id: xmltv_ca

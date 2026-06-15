@@ -40,6 +40,7 @@ class SourceConfig:
     time_shift_hours: int = 0
     multi_country: bool = False
     user_agent: Optional[str] = None
+    per_channel_shifts: Dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
@@ -135,6 +136,10 @@ def load_config(
             time_shift_hours=s.get("time_shift_hours", 0),
             multi_country=s.get("multi_country", False),
             user_agent=s.get("user_agent"),
+            per_channel_shifts={
+                str(k): int(v)
+                for k, v in s.get("per_channel_shifts", {}).items()
+            },
         ))
 
     out = cfg.get("output", {})
@@ -459,6 +464,7 @@ def stream_programmes_to_file(
     seen_set: Set[Tuple[str, str]],
     alias_reverse: Dict[str, List[str]],
     time_shift_hours: int = 0,
+    per_channel_shifts: Optional[Dict[str, int]] = None,
     claimed_channels: Optional[Set[str]] = None,
     newly_claimed: Optional[Set[str]] = None,
 ) -> int:
@@ -492,13 +498,18 @@ def stream_programmes_to_file(
                 root.clear()
                 continue
 
-            # Apply time shift before dedup so keys reflect actual broadcast time
-            if time_shift_hours:
-                start = _shift_xmltv_time(start, time_shift_hours)
+            # Apply time shift before dedup so keys reflect actual broadcast time.
+            # Per-channel shifts (e.g. for epg.pw 12xxx series) stack on top of
+            # the source-level shift so individual channels can be corrected
+            # without changing the base offset for the rest of the source.
+            extra = per_channel_shifts.get(channel_id, 0) if per_channel_shifts else 0
+            total_shift = time_shift_hours + extra
+            if total_shift:
+                start = _shift_xmltv_time(start, total_shift)
                 elem.set("start", start)
                 stop = elem.get("stop", "").strip()
                 if stop:
-                    elem.set("stop", _shift_xmltv_time(stop, time_shift_hours))
+                    elem.set("stop", _shift_xmltv_time(stop, total_shift))
 
             key = (channel_id, start)
             if key in seen_set:
@@ -596,6 +607,7 @@ def write_xmltv_output(
             n = stream_programmes_to_file(
                 result.file_path, out, valid_ids, seen_set, alias_reverse,
                 time_shift_hours=result.source.time_shift_hours,
+                per_channel_shifts=result.source.per_channel_shifts or None,
                 claimed_channels=claimed_channels,
                 newly_claimed=source_written,
             )
