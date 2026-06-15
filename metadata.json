@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15 13:49:22 UTC",
+  "generated_at": "2026-06-15 13:57:05 UTC",
   "sources": [
     {
       "id": "epg_pw_au",
@@ -49,7 +49,7 @@
       "channels": 0,
       "programmes": 0,
       "cached": false,
-      "error": "response was not valid XML"
+      "error": "empty response (0 bytes)"
     }
   ],
   "output_files": [
