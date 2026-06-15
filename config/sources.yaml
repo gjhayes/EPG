@@ -1,11 +1,32 @@
 sources:
 
+  # ── Provider EPG (PRIMARY) ──────────────────────────────────────────────────
+  # The strong8k Xtream EPG is correct for every channel it carries (no time
+  # offset), includes live-sports listings (F1, AFL, etc.) that no free source
+  # has, and uses the same dotted channel IDs as the M3U — so it needs no
+  # channel_map and wins channel ownership over epg.pw.
+  #
+  # The full URL (http://HOST/xmltv.php?username=...&password=...) is injected
+  # from the XTREAM_EPG_URL secret so no credentials or host ever land in the
+  # repo. If the secret is unset the source disables itself and the build falls
+  # back to epg.pw alone.
+  - id: xtream_provider
+    name: "Provider Xtream EPG"
+    url: "${XTREAM_EPG_URL}"
+    country: ALL
+    multi_country: true
+    priority: 1
+    enabled: true
+    timeout: 180
+    retry: 3
+    time_shift_hours: 0
+
   # ── Australia ──────────────────────────────────────────────────────────────
   - id: epg_pw_au
     name: "epg.pw Australia"
     url: "https://epg.pw/xmltv/epg_AU.xml"
     country: AU
-    priority: 1
+    priority: 2
     enabled: true
     timeout: 120
     retry: 3
@@ -23,7 +44,7 @@ sources:
     name: "epg.pw United Kingdom"
     url: "https://epg.pw/xmltv/epg_GB.xml"
     country: GB
-    priority: 1
+    priority: 2
     enabled: true
     timeout: 120
     retry: 3
@@ -41,7 +62,7 @@ sources:
     name: "epg.pw United States"
     url: "https://epg.pw/xmltv/epg_US.xml"
     country: US
-    priority: 1
+    priority: 2
     enabled: true
     timeout: 300
     retry: 3
@@ -59,7 +80,7 @@ sources:
     name: "epg.pw Canada"
     url: "https://epg.pw/xmltv/epg_CA.xml"
     country: CA
-    priority: 1
+    priority: 2
     enabled: true
     timeout: 120
     retry: 3

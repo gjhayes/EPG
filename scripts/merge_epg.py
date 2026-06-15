@@ -9,6 +9,7 @@ import gzip
 import json
 import logging
 import os
+import re
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -37,6 +38,7 @@ class SourceConfig:
     timeout: int
     retry: int
     time_shift_hours: int = 0
+    multi_country: bool = False
 
 
 @dataclass
@@ -82,6 +84,26 @@ class SourceResult:
 
 # ── Config loading ─────────────────────────────────────────────────────────────
 
+def _expand_env_url(url: str) -> Tuple[str, List[str]]:
+    """Substitute ${VAR} placeholders from the environment.
+
+    Returns the expanded URL plus a list of any referenced variables that were
+    unset or empty — used to disable sources whose secrets aren't configured
+    (e.g. the provider EPG when XTREAM_EPG_URL isn't set), so the build never
+    leaks credentials into the repo and degrades gracefully without them.
+    """
+    missing: List[str] = []
+
+    def repl(m):
+        val = os.environ.get(m.group(1))
+        if not val:
+            missing.append(m.group(1))
+            return ""
+        return val
+
+    return re.sub(r"\$\{(\w+)\}", repl, url), missing
+
+
 def load_config(
     config_path: str,
     channel_map_path: str,
@@ -89,21 +111,29 @@ def load_config(
     with open(config_path) as f:
         cfg = yaml.safe_load(f)
 
-    sources = [
-        SourceConfig(
+    sources: List[SourceConfig] = []
+    for s in cfg.get("sources", []):
+        if not s.get("enabled", True):
+            continue
+        url, missing = _expand_env_url(s["url"])
+        if missing:
+            LOG.warning(
+                "[%s] disabled — required env var(s) not set: %s",
+                s["id"], ", ".join(missing),
+            )
+            continue
+        sources.append(SourceConfig(
             id=s["id"],
             name=s.get("name", s["id"]),
-            url=s["url"],
+            url=url,
             country=s["country"].upper(),
             priority=s.get("priority", 99),
-            enabled=s.get("enabled", True),
+            enabled=True,
             timeout=s.get("timeout", 120),
             retry=s.get("retry", 3),
             time_shift_hours=s.get("time_shift_hours", 0),
-        )
-        for s in cfg.get("sources", [])
-        if s.get("enabled", True)
-    ]
+            multi_country=s.get("multi_country", False),
+        ))
 
     out = cfg.get("output", {})
     output = OutputConfig(
@@ -281,6 +311,28 @@ def _is_xml(path: Path) -> bool:
 
 # ── XMLTV parsing ──────────────────────────────────────────────────────────────
 
+# Map dotted-channel-ID suffixes (as used by the strong8k M3U / provider EPG)
+# to the ISO country codes our per-country output files use.
+_SUFFIX_COUNTRY = {
+    "au": "AU", "uk": "GB", "gb": "GB", "ca": "CA", "us": "US",
+    "nz": "NZ", "ie": "IE",
+}
+
+
+def country_for_channel(channel_id: str, default: str) -> str:
+    """Derive a channel's country from its dotted ID suffix when present.
+
+    Provider/M3U IDs encode country in the suffix (e.g. ``ABC.au``, ``bbc1.uk``),
+    so multi-country sources still land in the correct per-country file. Numeric
+    epg.pw IDs have no suffix and fall back to the source's configured country.
+    """
+    if "." in channel_id:
+        suffix = channel_id.rsplit(".", 1)[1].lower()
+        if suffix.isalpha() and len(suffix) <= 3:
+            return _SUFFIX_COUNTRY.get(suffix, suffix.upper())
+    return default
+
+
 def collect_channels(file_path: Path, source: SourceConfig) -> Dict[str, ChannelData]:
     channels: Dict[str, ChannelData] = {}
     try:
@@ -302,7 +354,7 @@ def collect_channels(file_path: Path, source: SourceConfig) -> Dict[str, Channel
                     display_names=names,
                     icon_src=icon_src,
                     source_id=source.id,
-                    country=source.country,
+                    country=country_for_channel(cid, source.country),
                 )
                 elem.clear()
             elif elem.tag == "programme":
@@ -341,7 +393,7 @@ def apply_channel_aliases(
                 display_names=original.display_names,
                 icon_src=original.icon_src,
                 source_id=original.source_id,
-                country=original.country,
+                country=country_for_channel(alt_id, original.country),
             )
     return expanded
 
@@ -391,8 +443,19 @@ def stream_programmes_to_file(
     seen_set: Set[Tuple[str, str]],
     alias_reverse: Dict[str, List[str]],
     time_shift_hours: int = 0,
+    claimed_channels: Optional[Set[str]] = None,
+    newly_claimed: Optional[Set[str]] = None,
 ) -> int:
-    """Stream <programme> elements from source_path to out for valid channels."""
+    """Stream <programme> elements from source_path to out for valid channels.
+
+    Channel-level ownership: a channel whose ID is already in
+    ``claimed_channels`` (written by a higher-priority source) is skipped
+    entirely, so a channel's listings come wholly from one source rather than
+    mixing two schedules. IDs this source writes are recorded in
+    ``newly_claimed`` for the caller to fold into ``claimed_channels``.
+    """
+    claimed = claimed_channels or set()
+    written = newly_claimed if newly_claimed is not None else set()
     count = 0
     try:
         # Use start+end events so we can grab the root and clear it after each
@@ -408,7 +471,8 @@ def stream_programmes_to_file(
             channel_id = elem.get("channel", "").strip()
             start = elem.get("start", "").strip()
 
-            if channel_id not in valid_channel_ids:
+            # Skip channels not wanted, or already owned by a higher-priority source
+            if channel_id not in valid_channel_ids or channel_id in claimed:
                 root.clear()
                 continue
 
@@ -429,10 +493,14 @@ def stream_programmes_to_file(
             # Serialise the programme element preserving all child content
             prog_xml = ET.tostring(elem, encoding="unicode").strip()
             out.write("  " + prog_xml + "\n")
+            written.add(channel_id)
             count += 1
 
-            # Emit duplicate entries for alias IDs
+            # Emit duplicate entries for alias IDs (unless a higher-priority
+            # source already owns that alias target)
             for alt_id in alias_reverse.get(channel_id, []):
+                if alt_id in claimed:
+                    continue
                 alt_key = (alt_id, start)
                 if alt_key not in seen_set:
                     seen_set.add(alt_key)
@@ -443,6 +511,7 @@ def stream_programmes_to_file(
                         1,
                     )
                     out.write("  " + alt_xml + "\n")
+                    written.add(alt_id)
                     count += 1
 
             # Drop all accumulated elements from the root to keep memory flat
@@ -480,6 +549,7 @@ def write_xmltv_output(
 
     valid_ids: Set[str] = set(filtered_channels.keys())
     seen_set: Set[Tuple[str, str]] = set()
+    claimed_channels: Set[str] = set()
     now_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -500,12 +570,20 @@ def write_xmltv_output(
             key=lambda r: r.source.priority,
         )
         for result in sorted_results:
-            if country_filter and result.source.country != country_filter:
+            # Single-country sources can be skipped for other countries' files;
+            # multi-country sources (e.g. the provider EPG) must always be read,
+            # with per-channel country filtering handled via valid_ids.
+            if (country_filter and not result.source.multi_country
+                    and result.source.country != country_filter):
                 continue
+            source_written: Set[str] = set()
             n = stream_programmes_to_file(
                 result.file_path, out, valid_ids, seen_set, alias_reverse,
                 time_shift_hours=result.source.time_shift_hours,
+                claimed_channels=claimed_channels,
+                newly_claimed=source_written,
             )
+            claimed_channels |= source_written
             result.programme_count += n
             total_programmes += n
 
@@ -649,7 +727,10 @@ def main() -> int:
     country_filter_set = None
     if args.countries:
         country_filter_set = {c.strip().upper() for c in args.countries.split(",")}
-        sources = [s for s in sources if s.country in country_filter_set]
+        sources = [
+            s for s in sources
+            if s.multi_country or s.country in country_filter_set
+        ]
 
     cache = CacheManager(cache_dir)
 
@@ -716,9 +797,13 @@ def main() -> int:
     })
     LOG.info("Combined: %d channels, %d programmes, %.1fMB", ch_count, prog_count, size_mb)
 
-    # Per-country outputs
+    # Per-country outputs — derive the country set from the actual channels
+    # (their dotted-ID suffix / source country) rather than source.country, so
+    # multi-country sources like the provider EPG don't create an "epg_ALL" file.
     if output_cfg.per_country:
-        countries = sorted({s.country for s in sources})
+        single_country = {s.country for s in sources if not s.multi_country}
+        channel_countries = {ch.country for ch in all_channels.values()}
+        countries = sorted(single_country & channel_countries)
         if country_filter_set:
             countries = [c for c in countries if c in country_filter_set]
         for country in countries:

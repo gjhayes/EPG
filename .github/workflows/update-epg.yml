@@ -57,6 +57,11 @@ jobs:
             --log-level INFO
         env:
           FORCE_DOWNLOAD: ${{ inputs.force_download }}
+          # Full provider EPG URL incl. credentials. Set in repo
+          # Settings → Secrets and variables → Actions → New repository secret.
+          # If unset, the provider source disables itself and the build uses
+          # epg.pw alone.
+          XTREAM_EPG_URL: ${{ secrets.XTREAM_EPG_URL }}
 
       - name: Save EPG source cache
         uses: actions/cache/save@v4

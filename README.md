@@ -62,9 +62,32 @@ Live source health and file listing: **https://gjhayes.github.io/EPG/**
 After cloning or forking this repo:
 
 1. Go to **Settings → Pages** → Source: **Deploy from a branch** → Branch: `gh-pages` / `/ (root)`
-2. Go to **Actions** → **Update EPG Data** → **Run workflow** → set `force_download=true`
-3. Wait ~10-15 minutes for the first run to complete and Pages to activate
-4. Add the URL to TiviMate
+2. *(Recommended)* Add the provider EPG secret — see below
+3. Go to **Actions** → **Update EPG Data** → **Run workflow** → set `force_download=true`
+4. Wait ~10-15 minutes for the first run to complete and Pages to activate
+5. Add the URL to TiviMate
+
+### Provider EPG secret (primary source)
+
+The **primary** EPG source is your IPTV provider's own Xtream guide. It is correct
+for every channel (no time-offset issues), includes live-sports listings that no
+free EPG carries, and matches channels automatically (same IDs as your M3U).
+epg.pw is kept only as a **fallback** for channels the provider EPG doesn't cover.
+
+Add your provider's full XMLTV URL as a repository secret so it never appears in
+the code or output:
+
+1. **Settings → Secrets and variables → Actions → New repository secret**
+2. Name: `XTREAM_EPG_URL`
+3. Value: `http://YOUR_HOST/xmltv.php?username=YOUR_USER&password=YOUR_PASS`
+
+If the secret is **not** set, the build automatically falls back to epg.pw alone
+(channel guide times for some channels may be off, and live-sports channels will
+show "No listing available").
+
+> Note: GitHub Actions runners must be able to reach your provider's host. Some
+> providers block datacenter IPs; if the `xtream_provider` source shows `failed`
+> on the status page, the build still works via the epg.pw fallback.
 
 ## Local Testing
 
