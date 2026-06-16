@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15 20:45:52 UTC",
+  "generated_at": "2026-06-16 02:43:13 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -15,30 +15,30 @@
       "id": "epg_pw_au",
       "name": "epg.pw Australia",
       "country": "AU",
-      "status": "cached",
+      "status": "ok",
       "channels": 218,
-      "programmes": 58972,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
-      "status": "cached",
-      "channels": 5457,
-      "programmes": 834008,
-      "cached": true,
+      "programmes": 58788,
+      "cached": false,
       "error": ""
     },
     {
       "id": "epg_pw_ca",
       "name": "epg.pw Canada",
       "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 75944,
-      "cached": true,
+      "status": "ok",
+      "channels": 696,
+      "programmes": 118290,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "ok",
+      "channels": 5457,
+      "programmes": 857088,
+      "cached": false,
       "error": ""
     },
     {
@@ -55,21 +55,21 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7595,
-      "programmes": 538047,
+      "channels": 7596,
+      "programmes": 570668,
       "size_mb": 26.51
     },
     {
       "filename": "epg_AU.xml.gz",
       "channels": 235,
-      "programmes": 29486,
-      "size_mb": 0.86
+      "programmes": 29394,
+      "size_mb": 0.87
     },
     {
       "filename": "epg_CA.xml.gz",
-      "channels": 800,
-      "programmes": 37972,
-      "size_mb": 1.87
+      "channels": 801,
+      "programmes": 59145,
+      "size_mb": 2.61
     },
     {
       "filename": "epg_GB.xml.gz",
@@ -80,8 +80,8 @@
     {
       "filename": "epg_US.xml.gz",
       "channels": 5605,
-      "programmes": 417004,
-      "size_mb": 21.49
+      "programmes": 428544,
+      "size_mb": 20.74
     }
   ]
 }
