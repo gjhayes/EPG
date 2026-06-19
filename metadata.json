@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-06-19 10:12:39 UTC",
+  "generated_at": "2026-06-19 14:42:33 UTC",
   "sources": [
     {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
+      "id": "epg_pw_gb",
+      "name": "epg.pw United Kingdom",
+      "country": "GB",
       "status": "cached",
-      "channels": 220,
-      "programmes": 59210,
+      "channels": 760,
+      "programmes": 132360,
       "cached": true,
       "error": ""
     },
@@ -22,13 +22,13 @@
       "error": ""
     },
     {
-      "id": "epg_pw_gb",
-      "name": "epg.pw United Kingdom",
-      "country": "GB",
-      "status": "ok",
-      "channels": 760,
-      "programmes": 132360,
-      "cached": false,
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
+      "status": "cached",
+      "channels": 220,
+      "programmes": 59210,
+      "cached": true,
       "error": ""
     },
     {
