@@ -177,10 +177,9 @@ mappings:
   "FoxSoccerPlus.us": "465214"
   "FoxSports1.us": "446961"
   "FoxSports2.us": "496765"
-  "FoxSports3.au": "447015"
-  "FoxSports5.au": "447007"
-  "FoxSports6.au": "446961"
-  "FoxSportsNews.au": "447006"
+  # FoxSports3/5/6/News.au removed — epg.pw has only "No listing available"
+  # for these channels (447015/447007/446961/447006). Keeping them here would
+  # block TiviMate from using the Xtream provider EPG's real Fox Sports data.
   "Freeform.us": "465331"
   "FrissonsTV.ca": "470882"
   "FuboSportsNetwork.us": "464937"
