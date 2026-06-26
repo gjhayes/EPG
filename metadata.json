@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26 08:50:28 UTC",
+  "generated_at": "2026-06-26 13:38:57 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -17,7 +17,7 @@
       "country": "AU",
       "status": "ok",
       "channels": 219,
-      "programmes": 59712,
+      "programmes": 59064,
       "cached": false,
       "error": ""
     },
@@ -55,15 +55,15 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7594,
-      "programmes": 582081,
+      "channels": 7590,
+      "programmes": 581757,
       "size_mb": 29.06
     },
     {
       "filename": "epg_AU.xml.gz",
-      "channels": 236,
-      "programmes": 29856,
-      "size_mb": 0.89
+      "channels": 232,
+      "programmes": 29532,
+      "size_mb": 0.88
     },
     {
       "filename": "epg_CA.xml.gz",
