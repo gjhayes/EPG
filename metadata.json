@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-07-09 19:21:44 UTC",
+  "generated_at": "2026-07-10 01:51:50 UTC",
   "sources": [
-    {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
-      "status": "cached",
-      "channels": 219,
-      "programmes": 56602,
-      "cached": true,
-      "error": ""
-    },
     {
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
@@ -22,12 +12,12 @@
       "error": ""
     },
     {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
       "status": "cached",
-      "channels": 5454,
-      "programmes": 866910,
+      "channels": 219,
+      "programmes": 56602,
       "cached": true,
       "error": ""
     },
@@ -35,10 +25,20 @@
       "id": "epg_pw_ca",
       "name": "epg.pw Canada",
       "country": "CA",
-      "status": "cached",
+      "status": "ok",
       "channels": 695,
-      "programmes": 118690,
-      "cached": true,
+      "programmes": 116900,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "ok",
+      "channels": 5454,
+      "programmes": 851554,
+      "cached": false,
       "error": ""
     },
     {
@@ -56,8 +56,8 @@
     {
       "filename": "epg.xml.gz",
       "channels": 7582,
-      "programmes": 587705,
-      "size_mb": 27.25
+      "programmes": 579132,
+      "size_mb": 29.01
     },
     {
       "filename": "epg_AU.xml.gz",
@@ -68,8 +68,8 @@
     {
       "filename": "epg_CA.xml.gz",
       "channels": 800,
-      "programmes": 59345,
-      "size_mb": 2.69
+      "programmes": 58450,
+      "size_mb": 2.75
     },
     {
       "filename": "epg_GB.xml.gz",
@@ -80,8 +80,8 @@
     {
       "filename": "epg_US.xml.gz",
       "channels": 5598,
-      "programmes": 433455,
-      "size_mb": 21.14
+      "programmes": 425777,
+      "size_mb": 22.84
     }
   ]
 }
