@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12 18:49:54 UTC",
+  "generated_at": "2026-07-13 01:47:44 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -12,12 +12,12 @@
       "error": ""
     },
     {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
       "status": "cached",
-      "channels": 5454,
-      "programmes": 827858,
+      "channels": 219,
+      "programmes": 57020,
       "cached": true,
       "error": ""
     },
@@ -32,13 +32,13 @@
       "error": ""
     },
     {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
-      "status": "cached",
-      "channels": 219,
-      "programmes": 57020,
-      "cached": true,
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "ok",
+      "channels": 5454,
+      "programmes": 835856,
+      "cached": false,
       "error": ""
     },
     {
@@ -56,8 +56,8 @@
     {
       "filename": "epg.xml.gz",
       "channels": 7585,
-      "programmes": 564818,
-      "size_mb": 29.49
+      "programmes": 568817,
+      "size_mb": 28.01
     },
     {
       "filename": "epg_AU.xml.gz",
@@ -80,8 +80,8 @@
     {
       "filename": "epg_US.xml.gz",
       "channels": 5598,
-      "programmes": 413929,
-      "size_mb": 23.2
+      "programmes": 417928,
+      "size_mb": 21.71
     }
   ]
 }
