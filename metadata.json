@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15 13:09:55 UTC",
+  "generated_at": "2026-07-15 18:55:03 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -22,22 +22,22 @@
       "error": ""
     },
     {
-      "id": "epg_pw_ca",
-      "name": "epg.pw Canada",
-      "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 125376,
-      "cached": true,
-      "error": ""
-    },
-    {
       "id": "epg_pw_au",
       "name": "epg.pw Australia",
       "country": "AU",
       "status": "cached",
       "channels": 218,
       "programmes": 57884,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_ca",
+      "name": "epg.pw Canada",
+      "country": "CA",
+      "status": "cached",
+      "channels": 695,
+      "programmes": 125376,
       "cached": true,
       "error": ""
     },
