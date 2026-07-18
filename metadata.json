@@ -1,24 +1,14 @@
 {
-  "generated_at": "2026-07-17 18:52:51 UTC",
+  "generated_at": "2026-07-18 01:24:09 UTC",
   "sources": [
-    {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
-      "status": "cached",
-      "channels": 218,
-      "programmes": 58348,
-      "cached": true,
-      "error": ""
-    },
     {
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
       "country": "GB",
-      "status": "cached",
+      "status": "ok",
       "channels": 756,
-      "programmes": 132888,
-      "cached": true,
+      "programmes": 131052,
+      "cached": false,
       "error": ""
     },
     {
@@ -32,13 +22,23 @@
       "error": ""
     },
     {
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
+      "status": "ok",
+      "channels": 217,
+      "programmes": 56380,
+      "cached": false,
+      "error": ""
+    },
+    {
       "id": "epg_pw_ca",
       "name": "epg.pw Canada",
       "country": "CA",
-      "status": "cached",
+      "status": "ok",
       "channels": 695,
-      "programmes": 117218,
-      "cached": true,
+      "programmes": 114350,
+      "cached": false,
       "error": ""
     },
     {
@@ -55,27 +55,27 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7585,
-      "programmes": 712510,
-      "size_mb": 37.25
+      "channels": 7584,
+      "programmes": 709174,
+      "size_mb": 37.18
     },
     {
       "filename": "epg_AU.xml.gz",
-      "channels": 235,
-      "programmes": 29174,
-      "size_mb": 0.87
+      "channels": 234,
+      "programmes": 28190,
+      "size_mb": 0.82
     },
     {
       "filename": "epg_CA.xml.gz",
       "channels": 800,
-      "programmes": 58609,
-      "size_mb": 2.76
+      "programmes": 57175,
+      "size_mb": 2.74
     },
     {
       "filename": "epg_GB.xml.gz",
       "channels": 951,
-      "programmes": 66444,
-      "size_mb": 2.7
+      "programmes": 65526,
+      "size_mb": 2.69
     },
     {
       "filename": "epg_US.xml.gz",
