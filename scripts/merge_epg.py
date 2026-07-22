@@ -729,6 +729,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Merge EPG sources into XMLTV files")
     parser.add_argument("--config", default="config/sources.yaml")
     parser.add_argument("--channel-map", default="config/channel_map.yaml")
+    parser.add_argument("--manual-epg", default="config/manual_epg.xml",
+                        help="Optional local XMLTV file merged verbatim into every output "
+                             "(no time-shift) for events no upstream source labels")
     parser.add_argument("--output-dir", default="output")
     parser.add_argument("--cache-dir", default=None, help="Override cache dir from config")
     parser.add_argument("--countries", default=None, help="Comma-separated country codes to process")
@@ -786,6 +789,26 @@ def main() -> int:
                 "[%s] status=%s cached=%s error=%s",
                 result.source.id, result.status, result.cached, result.error or "-"
             )
+
+    # ── Manual EPG overlay ─────────────────────────────────────────────────────
+    # A local XMLTV file merged verbatim (no time-shift) as a highest-priority
+    # pseudo-source, so its channels win ownership and its programmes are written
+    # first. Used for events no upstream feed labels (e.g. a provider stream with
+    # no tvg-id / no guide). Its channels carry dotted country suffixes so they
+    # route into the correct per-country files via the normal pipeline.
+    manual_path = Path(args.manual_epg) if args.manual_epg else None
+    if manual_path and manual_path.exists() and _is_xml(manual_path):
+        manual_src = SourceConfig(
+            id="manual_overlay", name="Manual EPG overlay", url=str(manual_path),
+            country="ALL", priority=0, enabled=True, timeout=0, retry=0,
+            time_shift_hours=0, multi_country=True,
+        )
+        source_results.append(SourceResult(
+            source=manual_src, file_path=manual_path, cached=False, status="ok",
+        ))
+        LOG.info("[manual_overlay] merging overlay from %s", manual_path)
+    elif args.manual_epg:
+        LOG.info("[manual_overlay] no overlay file at %s (skipping)", args.manual_epg)
 
     # ── Collect channels from all successful sources ───────────────────────────
     source_channels: List[Tuple[SourceConfig, Dict[str, ChannelData]]] = []

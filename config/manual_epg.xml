@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Manual EPG overlay — merged verbatim into every output file by merge_epg.py
+  (no time-shift applied). Use for events no upstream source labels.
+
+  Channel id uses a dotted country suffix so it lands in the right per-country
+  file (e.g. .au -> epg_AU.xml + combined). To attach it to a provider stream
+  that has no tvg-id (e.g. Fox Sports 507), in TiviMate: long-press the channel
+  -> Edit -> EPG -> pick this channel by its display-name.
+
+  Times are Sydney local (AEST, UTC+10) -> " +1000".
+
+  ── Water Polo World Cup 2026 Finals (Sydney, 22-26 Jul) ──────────────────────
+  Men's fixtures per Eurovision Sport; finals-day times cross-checked against the
+  provider's Peacock feed. Fox may split simultaneous matches across Fox Sports
+  503-507, so a given slot might air on a sibling channel.
+-->
+<tv generator-info-name="EPG-Aggregator-manual">
+  <channel id="WaterPoloWC.au">
+    <display-name>Water Polo World Cup (Fox 507)</display-name>
+    <display-name>Water Polo World Cup</display-name>
+  </channel>
+
+  <!-- Wed 22 Jul — Women's Quarterfinals -->
+  <programme start="20260722150000 +1000" stop="20260722164500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's QF: USA v China</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal. Coverage may be split across Fox Sports 503-507.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260722164500 +1000" stop="20260722183000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's Quarterfinal</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260722183000 +1000" stop="20260722201500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's QF: Australia v Italy</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Aussie Stingers v Italy, women's quarterfinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260722201500 +1000" stop="20260722220000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's Quarterfinal</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal.</desc>
+    <category>Sport</category></programme>
+
+  <!-- Thu 23 Jul — Men's Quarterfinals -->
+  <programme start="20260723150000 +1000" stop="20260723164500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's QF: Italy v Georgia</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's quarterfinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260723164500 +1000" stop="20260723183000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's QF: Greece v Montenegro</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's quarterfinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260723183000 +1000" stop="20260723201500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's QF: Australia v Spain</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Aussie Sharks v Spain, men's quarterfinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260723201500 +1000" stop="20260723220000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's QF: Hungary v Croatia</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's quarterfinal.</desc>
+    <category>Sport</category></programme>
+
+  <!-- Fri 24 Jul — Men's classification semis + Women's semifinals -->
+  <programme start="20260724150000 +1000" stop="20260724164500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's 5th-8th Classification</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's classification playoff (losing quarterfinalists).</desc>
+    <category>Sport</category></programme>
+  <programme start="20260724164500 +1000" stop="20260724183000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's 5th-8th Classification</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's classification playoff (losing quarterfinalists).</desc>
+    <category>Sport</category></programme>
+  <programme start="20260724183000 +1000" stop="20260724201500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's Semifinal 1</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's semifinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260724201500 +1000" stop="20260724220000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's Semifinal 2</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's semifinal.</desc>
+    <category>Sport</category></programme>
+
+  <!-- Sat 25 Jul — Men's classification + Men's semifinals -->
+  <programme start="20260725150000 +1000" stop="20260725164500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's 7th/8th Place</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's classification match.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260725164500 +1000" stop="20260725183000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's 5th/6th Place</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's classification match.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260725183000 +1000" stop="20260725201500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's Semifinal 1</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's semifinal.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260725201500 +1000" stop="20260725220000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's Semifinal 2</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's semifinal.</desc>
+    <category>Sport</category></programme>
+
+  <!-- Sun 26 Jul — Finals day -->
+  <programme start="20260726124500 +1000" stop="20260726143000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's Bronze Medal Match</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's bronze medal game.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260726143000 +1000" stop="20260726161500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's Bronze Medal Match</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's bronze medal game.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260726161500 +1000" stop="20260726180000 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Women's GOLD Medal Match</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's gold medal final.</desc>
+    <category>Sport</category></programme>
+  <programme start="20260726180000 +1000" stop="20260726194500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's GOLD Medal Match</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's gold medal final.</desc>
+    <category>Sport</category></programme>
+</tv>
