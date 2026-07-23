@@ -1,14 +1,14 @@
 {
-  "generated_at": "2026-07-22 18:57:05 UTC",
+  "generated_at": "2026-07-23 01:48:34 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
       "country": "GB",
-      "status": "cached",
+      "status": "ok",
       "channels": 757,
-      "programmes": 134250,
-      "cached": true,
+      "programmes": 134574,
+      "cached": false,
       "error": ""
     },
     {
@@ -22,23 +22,23 @@
       "error": ""
     },
     {
-      "id": "epg_pw_ca",
-      "name": "epg.pw Canada",
-      "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 118942,
-      "cached": true,
-      "error": ""
-    },
-    {
       "id": "epg_pw_au",
       "name": "epg.pw Australia",
       "country": "AU",
-      "status": "cached",
-      "channels": 217,
-      "programmes": 58482,
-      "cached": true,
+      "status": "ok",
+      "channels": 218,
+      "programmes": 57090,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_ca",
+      "name": "epg.pw Canada",
+      "country": "CA",
+      "status": "ok",
+      "channels": 695,
+      "programmes": 117760,
+      "cached": false,
       "error": ""
     },
     {
@@ -55,27 +55,27 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7594,
-      "programmes": 592114,
-      "size_mb": 27.18
+      "channels": 7595,
+      "programmes": 590989,
+      "size_mb": 27.21
     },
     {
       "filename": "epg_AU.xml.gz",
-      "channels": 234,
-      "programmes": 29241,
-      "size_mb": 0.86
+      "channels": 235,
+      "programmes": 28545,
+      "size_mb": 0.83
     },
     {
       "filename": "epg_CA.xml.gz",
       "channels": 800,
-      "programmes": 59471,
-      "size_mb": 2.61
+      "programmes": 58880,
+      "size_mb": 2.65
     },
     {
       "filename": "epg_GB.xml.gz",
       "channels": 952,
-      "programmes": 67125,
-      "size_mb": 2.57
+      "programmes": 67287,
+      "size_mb": 2.6
     },
     {
       "filename": "epg_US.xml.gz",
