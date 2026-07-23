@@ -21,22 +21,22 @@
     <display-name>Water Polo World Cup</display-name>
   </channel>
 
-  <!-- Wed 22 Jul — Women's Quarterfinals -->
+  <!-- Wed 22 Jul — Women's Quarterfinals (completed) -->
   <programme start="20260722150000 +1000" stop="20260722164500 +1000" channel="WaterPoloWC.au">
     <title>Water Polo World Cup — Women's QF: USA v China</title>
-    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal. Coverage may be split across Fox Sports 503-507.</desc>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal. Result: USA 14-8 China. Coverage may be split across Fox Sports 503-507.</desc>
     <category>Sport</category></programme>
   <programme start="20260722164500 +1000" stop="20260722183000 +1000" channel="WaterPoloWC.au">
-    <title>Water Polo World Cup — Women's Quarterfinal</title>
-    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal.</desc>
+    <title>Water Polo World Cup — Women's QF: Russia v Netherlands</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal. Result: Russia 11-6 Netherlands.</desc>
     <category>Sport</category></programme>
   <programme start="20260722183000 +1000" stop="20260722201500 +1000" channel="WaterPoloWC.au">
     <title>Water Polo World Cup — Women's QF: Australia v Italy</title>
-    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Aussie Stingers v Italy, women's quarterfinal.</desc>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Aussie Stingers v Italy, women's quarterfinal. Result: Australia 15-14 Italy.</desc>
     <category>Sport</category></programme>
   <programme start="20260722201500 +1000" stop="20260722220000 +1000" channel="WaterPoloWC.au">
-    <title>Water Polo World Cup — Women's Quarterfinal</title>
-    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal.</desc>
+    <title>Water Polo World Cup — Women's QF: Spain v Hungary</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's quarterfinal. Result: Spain 8-7 Hungary.</desc>
     <category>Sport</category></programme>
 
   <!-- Thu 23 Jul — Men's Quarterfinals -->
@@ -67,11 +67,11 @@
     <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Men's classification playoff (losing quarterfinalists).</desc>
     <category>Sport</category></programme>
   <programme start="20260724183000 +1000" stop="20260724201500 +1000" channel="WaterPoloWC.au">
-    <title>Water Polo World Cup — Women's Semifinal 1</title>
-    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's semifinal.</desc>
+    <title>Water Polo World Cup — Women's SF: USA v Australia</title>
+    <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's semifinal. Aussie Stingers v USA.</desc>
     <category>Sport</category></programme>
   <programme start="20260724201500 +1000" stop="20260724220000 +1000" channel="WaterPoloWC.au">
-    <title>Water Polo World Cup — Women's Semifinal 2</title>
+    <title>Water Polo World Cup — Women's SF: Russia v Spain</title>
     <desc>2026 World Aquatics Water Polo World Cup Finals, Sydney. Women's semifinal.</desc>
     <category>Sport</category></programme>
 
