@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31 13:31:11 UTC",
+  "generated_at": "2026-07-31 19:08:38 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -8,26 +8,6 @@
       "status": "cached",
       "channels": 757,
       "programmes": 132634,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
-      "status": "cached",
-      "channels": 5467,
-      "programmes": 862724,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_ca",
-      "name": "epg.pw Canada",
-      "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 114268,
       "cached": true,
       "error": ""
     },
@@ -42,6 +22,16 @@
       "error": ""
     },
     {
+      "id": "epg_pw_ca",
+      "name": "epg.pw Canada",
+      "country": "CA",
+      "status": "cached",
+      "channels": 695,
+      "programmes": 114268,
+      "cached": true,
+      "error": ""
+    },
+    {
       "id": "xtream_provider",
       "name": "Provider Xtream EPG",
       "country": "ALL",
@@ -50,6 +40,16 @@
       "programmes": 0,
       "cached": false,
       "error": "empty response (0 bytes)"
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "cached",
+      "channels": 5467,
+      "programmes": 862724,
+      "cached": true,
+      "error": ""
     }
   ],
   "output_files": [
@@ -57,7 +57,7 @@
       "filename": "epg.xml.gz",
       "channels": 7603,
       "programmes": 584554,
-      "size_mb": 29.67
+      "size_mb": 29.66
     },
     {
       "filename": "epg_AU.xml.gz",
