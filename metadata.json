@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-21 18:22:23 UTC",
+  "generated_at": "2026-08-22 00:37:09 UTC",
   "sources": [
     {
       "id": "epg_pw_au",
@@ -8,16 +8,6 @@
       "status": "cached",
       "channels": 220,
       "programmes": 55816,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_gb",
-      "name": "epg.pw United Kingdom",
-      "country": "GB",
-      "status": "cached",
-      "channels": 753,
-      "programmes": 133738,
       "cached": true,
       "error": ""
     },
@@ -42,6 +32,16 @@
       "error": ""
     },
     {
+      "id": "epg_pw_gb",
+      "name": "epg.pw United Kingdom",
+      "country": "GB",
+      "status": "ok",
+      "channels": 753,
+      "programmes": 132820,
+      "cached": false,
+      "error": ""
+    },
+    {
       "id": "xtream_provider",
       "name": "Provider Xtream EPG",
       "country": "ALL",
@@ -56,8 +56,8 @@
     {
       "filename": "epg.xml.gz",
       "channels": 7594,
-      "programmes": 580663,
-      "size_mb": 29.08
+      "programmes": 580204,
+      "size_mb": 29.09
     },
     {
       "filename": "epg_AU.xml.gz",
@@ -74,8 +74,8 @@
     {
       "filename": "epg_GB.xml.gz",
       "channels": 947,
-      "programmes": 66869,
-      "size_mb": 2.68
+      "programmes": 66410,
+      "size_mb": 2.69
     },
     {
       "filename": "epg_US.xml.gz",
