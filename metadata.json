@@ -1,44 +1,44 @@
 {
-  "generated_at": "2026-08-26 00:39:12 UTC",
+  "generated_at": "2026-08-26 06:29:34 UTC",
   "sources": [
+    {
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
+      "status": "ok",
+      "channels": 219,
+      "programmes": 56440,
+      "cached": false,
+      "error": ""
+    },
     {
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
       "country": "GB",
-      "status": "cached",
-      "channels": 753,
-      "programmes": 133846,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
-      "status": "cached",
-      "channels": 5466,
-      "programmes": 873580,
-      "cached": true,
+      "status": "ok",
+      "channels": 758,
+      "programmes": 133890,
+      "cached": false,
       "error": ""
     },
     {
       "id": "epg_pw_ca",
       "name": "epg.pw Canada",
       "country": "CA",
-      "status": "cached",
+      "status": "ok",
       "channels": 696,
-      "programmes": 117980,
-      "cached": true,
+      "programmes": 118536,
+      "cached": false,
       "error": ""
     },
     {
-      "id": "epg_pw_au",
-      "name": "epg.pw Australia",
-      "country": "AU",
-      "status": "cached",
-      "channels": 220,
-      "programmes": 56644,
-      "cached": true,
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "ok",
+      "channels": 5467,
+      "programmes": 873758,
+      "cached": false,
       "error": ""
     },
     {
@@ -55,33 +55,33 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7594,
-      "programmes": 591025,
-      "size_mb": 27.4
+      "channels": 7599,
+      "programmes": 591312,
+      "size_mb": 27.24
     },
     {
       "filename": "epg_AU.xml.gz",
-      "channels": 237,
-      "programmes": 28322,
-      "size_mb": 0.82
+      "channels": 236,
+      "programmes": 28220,
+      "size_mb": 0.83
     },
     {
       "filename": "epg_CA.xml.gz",
       "channels": 801,
-      "programmes": 58990,
-      "size_mb": 2.55
+      "programmes": 59268,
+      "size_mb": 2.6
     },
     {
       "filename": "epg_GB.xml.gz",
-      "channels": 947,
-      "programmes": 66923,
-      "size_mb": 2.57
+      "channels": 952,
+      "programmes": 66945,
+      "size_mb": 2.6
     },
     {
       "filename": "epg_US.xml.gz",
-      "channels": 5609,
-      "programmes": 436790,
-      "size_mb": 21.45
+      "channels": 5610,
+      "programmes": 436879,
+      "size_mb": 21.21
     }
   ]
 }
