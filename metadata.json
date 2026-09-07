@@ -1,24 +1,14 @@
 {
-  "generated_at": "2026-09-06 19:44:45 UTC",
+  "generated_at": "2026-09-07 01:45:35 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
       "name": "epg.pw United Kingdom",
       "country": "GB",
-      "status": "cached",
+      "status": "ok",
       "channels": 756,
-      "programmes": 131778,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
-      "status": "cached",
-      "channels": 5475,
-      "programmes": 1089680,
-      "cached": true,
+      "programmes": 134220,
+      "cached": false,
       "error": ""
     },
     {
@@ -35,10 +25,20 @@
       "id": "epg_pw_ca",
       "name": "epg.pw Canada",
       "country": "CA",
-      "status": "cached",
-      "channels": 695,
-      "programmes": 109636,
-      "cached": true,
+      "status": "ok",
+      "channels": 696,
+      "programmes": 112760,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "ok",
+      "channels": 5475,
+      "programmes": 828010,
+      "cached": false,
       "error": ""
     },
     {
@@ -55,9 +55,9 @@
   "output_files": [
     {
       "filename": "epg.xml.gz",
-      "channels": 7596,
-      "programmes": 693151,
-      "size_mb": 35.85
+      "channels": 7597,
+      "programmes": 565099,
+      "size_mb": 27.52
     },
     {
       "filename": "epg_AU.xml.gz",
@@ -67,21 +67,21 @@
     },
     {
       "filename": "epg_CA.xml.gz",
-      "channels": 800,
-      "programmes": 54818,
-      "size_mb": 2.62
+      "channels": 801,
+      "programmes": 56380,
+      "size_mb": 2.58
     },
     {
       "filename": "epg_GB.xml.gz",
       "channels": 949,
-      "programmes": 65889,
-      "size_mb": 2.7
+      "programmes": 67110,
+      "size_mb": 2.68
     },
     {
       "filename": "epg_US.xml.gz",
       "channels": 5617,
-      "programmes": 544840,
-      "size_mb": 29.71
+      "programmes": 414005,
+      "size_mb": 21.44
     }
   ]
 }
