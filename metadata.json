@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-11 10:11:00 UTC",
+  "generated_at": "2026-09-11 15:29:11 UTC",
   "sources": [
     {
       "id": "epg_pw_gb",
@@ -8,16 +8,6 @@
       "status": "cached",
       "channels": 756,
       "programmes": 133342,
-      "cached": true,
-      "error": ""
-    },
-    {
-      "id": "epg_pw_us",
-      "name": "epg.pw United States",
-      "country": "US",
-      "status": "cached",
-      "channels": 5475,
-      "programmes": 1108784,
       "cached": true,
       "error": ""
     },
@@ -38,6 +28,16 @@
       "status": "cached",
       "channels": 696,
       "programmes": 113644,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "cached",
+      "channels": 5475,
+      "programmes": 1108784,
       "cached": true,
       "error": ""
     },
