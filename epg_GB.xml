@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tv date="20260924020635 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
+<tv date="20260924104400 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
   <channel id="12020">
     <display-name lang="GB">COLORS</display-name>
   </channel>
@@ -2379,6 +2379,7 @@
   </channel>
   <channel id="CNBC.uk">
     <display-name lang="AU">CNBC</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924041137732723_67.php" />
   </channel>
   <channel id="CartoonNetwork.uk">
     <display-name lang="GB">Cartoon Netwrk</display-name>
@@ -2424,6 +2425,7 @@
   </channel>
   <channel id="DiscoveryTurbo.uk">
     <display-name lang="AU">Discovery Turbo</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040913777436_44.php" />
   </channel>
   <channel id="DisneyChannel.uk">
     <display-name lang="US">Disney Channel HD</display-name>
@@ -2457,6 +2459,7 @@
   </channel>
   <channel id="GBNews.uk">
     <display-name lang="AU">GB News</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040925773073_43.php" />
   </channel>
   <channel id="GOLD.uk">
     <display-name lang="GB">GOLD</display-name>
@@ -2607,6 +2610,7 @@
   </channel>
   <channel id="SkyShowcase.uk">
     <display-name lang="AU">Showcase</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040834891475_22.php" />
   </channel>
   <channel id="SkySportsAction.uk">
     <display-name lang="GB">SkySp ActionHD</display-name>
@@ -2661,6 +2665,7 @@
   </channel>
   <channel id="TLC.uk">
     <display-name lang="AU">TLC</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040712802963_61.php" />
   </channel>
   <channel id="TNTSport1.uk">
     <display-name lang="GB">TNT Sports 1 HD</display-name>
@@ -2751,6 +2756,7 @@
   </channel>
   <channel id="showcase.uk">
     <display-name lang="AU">Showcase</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040834891475_22.php" />
   </channel>
   <channel id="skyaction.uk">
     <display-name lang="GB">SkySp ActionHD</display-name>
@@ -2781,6 +2787,7 @@
   </channel>
   <channel id="skyshowcase.uk">
     <display-name lang="AU">Showcase</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040834891475_22.php" />
   </channel>
   <channel id="skysports1uhd.uk">
     <display-name lang="GB">Sky Sports Ultra HD 1</display-name>

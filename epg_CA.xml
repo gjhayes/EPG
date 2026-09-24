@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tv date="20260924020633 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
+<tv date="20260924104359 +0000" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">
   <channel id="470288">
     <display-name lang="CA">NFL6SC</display-name>
   </channel>
@@ -2105,6 +2105,7 @@
   </channel>
   <channel id="CBC.ca">
     <display-name lang="AU">CNBC</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924041137732723_67.php" />
   </channel>
   <channel id="CBCNews.ca">
     <display-name lang="GB">LBC News</display-name>
@@ -2141,6 +2142,7 @@
   </channel>
   <channel id="CTVComedy.ca">
     <display-name lang="AU">Comedy</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040755929744_42.php" />
   </channel>
   <channel id="CanalD.ca">
     <display-name lang="CA">Canal D</display-name>
@@ -2246,6 +2248,7 @@
   </channel>
   <channel id="MSNBC.ca">
     <display-name lang="AU">MSNBC</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040947541309_53.php" />
   </channel>
   <channel id="MTV.ca">
     <display-name lang="GB">MTV</display-name>
@@ -2294,6 +2297,7 @@
   </channel>
   <channel id="Showcase.ca">
     <display-name lang="AU">Showcase</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040834891475_22.php" />
   </channel>
   <channel id="SilverScreenClassics.ca">
     <display-name lang="CA">Silver Screen Classics</display-name>
@@ -2393,6 +2397,7 @@
   </channel>
   <channel id="tlc.ca">
     <display-name lang="AU">TLC</display-name>
+    <icon src="https://epg.pw/media/images/epg/2026/09/24/20260924040712802963_61.php" />
   </channel>
   <channel id="wnetwork.ca">
     <display-name lang="CA">W Network</display-name>
