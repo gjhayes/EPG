@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Manual EPG overlay — merged into every output by merge_epg.py as the
+  highest-priority source, with no time shift. Use it for events no upstream
+  feed labels, e.g. a provider stream with no tvg-id and no guide.
+
+  - Give each channel a dotted country suffix (.au, .uk, .us, .ca) so it lands
+    in the right per-country file; overlay channels are always in the slim feed.
+  - Write times with their real UTC offset (Sydney: +1000 AEST / +1100 AEDT).
+  - Programmes are dropped automatically once they end (settings.prune_ended_hours),
+    but delete finished events here too so the channel itself disappears.
+  - In TiviMate attach it to a stream: long-press the channel -> Edit -> EPG ->
+    pick the overlay channel by its display-name.
+
+  Example (Water Polo World Cup, Jul 2026, on Fox Sports 507):
+
+  <channel id="WaterPoloWC.au">
+    <display-name>Water Polo World Cup (Fox 507)</display-name>
+  </channel>
+  <programme start="20260726180000 +1000" stop="20260726194500 +1000" channel="WaterPoloWC.au">
+    <title>Water Polo World Cup — Men's Gold Medal Match</title>
+    <category>Sport</category>
+  </programme>
+-->
+<tv generator-info-name="EPG-Aggregator-manual">
+</tv>

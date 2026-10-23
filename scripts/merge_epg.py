@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 EPG aggregator: downloads XMLTV sources, merges channels and programmes,
-outputs gzip-compressed XMLTV files per country and combined.
+outputs gzip-compressed XMLTV files per country, combined, and a slim feed
+containing only the channels referenced by channel_map.yaml.
 """
 
 import argparse
 import gzip
+import html
 import json
 import logging
 import os
@@ -17,12 +19,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Pattern, Set, Tuple
+from urllib.parse import urlsplit
 
 import requests
 import yaml
 
 LOG = logging.getLogger("epg")
+
+MANUAL_SOURCE_ID = "manual_overlay"
 
 
 # ── Data structures ────────────────────────────────────────────────────────────
@@ -40,6 +45,25 @@ class SourceConfig:
     time_shift_hours: int = 0
     multi_country: bool = False
     user_agent: Optional[str] = None
+    # Explicit per-channel extra shifts; take precedence over patterns.
+    per_channel_shifts: Dict[str, int] = field(default_factory=dict)
+    # (compiled regex, extra hours) — first full match wins.
+    shift_patterns: List[Tuple[Pattern, int]] = field(default_factory=list)
+    # Position in sources.yaml; breaks priority ties deterministically.
+    order: int = 0
+    # URL came from an env secret: redact its host as well as its query.
+    sensitive: bool = False
+
+    def extra_shift(self, channel_id: str) -> int:
+        if channel_id in self.per_channel_shifts:
+            return self.per_channel_shifts[channel_id]
+        for pattern, hours in self.shift_patterns:
+            if pattern.fullmatch(channel_id):
+                return hours
+        return 0
+
+    def total_shift(self, channel_id: str) -> int:
+        return self.time_shift_hours + self.extra_shift(channel_id)
 
 
 @dataclass
@@ -48,6 +72,7 @@ class OutputConfig:
     per_country: bool
     compress: bool
     compress_level: int
+    slim_filename: Optional[str] = None
 
 
 @dataclass
@@ -61,6 +86,10 @@ class Settings:
     parallel_downloads: int
     retry_delay_seconds: int
     user_agent: str
+    prune_ended_hours: float = 6
+    min_combined_programmes: int = 0
+    max_programme_drop: float = 0.5
+    offset_checks: List[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -81,6 +110,29 @@ class SourceResult:
     channel_count: int = 0
     programme_count: int = 0
     error: str = ""
+    channel_ids: Set[str] = field(default_factory=set)
+
+
+# ── Redaction ──────────────────────────────────────────────────────────────────
+
+def redact(text: str, source: Optional[SourceConfig] = None) -> str:
+    """Strip credentials from text bound for logs, metadata.json or the status page.
+
+    The repo, its Actions logs and the Pages site are public, and requests'
+    exception messages embed the request URL (``...with url: /xmltv.php?
+    username=..&password=..``). GitHub's secret masking only matches the whole
+    secret, not such fragments, so remove query strings and userinfo here — and
+    the host too for sources whose URL came from a secret.
+    """
+    if not text:
+        return text
+    text = re.sub(r"(?i)(https?://)[^/\s@'\"]+@", r"\1", text)
+    text = re.sub(r"\?[^\s'\")]+", "?<redacted>", text)
+    if source is not None and source.sensitive:
+        host = urlsplit(source.url).hostname
+        if host:
+            text = text.replace(host, "<redacted-host>")
+    return text
 
 
 # ── Config loading ─────────────────────────────────────────────────────────────
@@ -113,7 +165,7 @@ def load_config(
         cfg = yaml.safe_load(f)
 
     sources: List[SourceConfig] = []
-    for s in cfg.get("sources", []):
+    for order, s in enumerate(cfg.get("sources", [])):
         if not s.get("enabled", True):
             continue
         url, missing = _expand_env_url(s["url"])
@@ -135,6 +187,16 @@ def load_config(
             time_shift_hours=s.get("time_shift_hours", 0),
             multi_country=s.get("multi_country", False),
             user_agent=s.get("user_agent"),
+            per_channel_shifts={
+                str(k): int(v)
+                for k, v in (s.get("per_channel_shifts") or {}).items()
+            },
+            shift_patterns=[
+                (re.compile(p["pattern"]), int(p["hours"]))
+                for p in (s.get("per_channel_shift_patterns") or [])
+            ],
+            order=order,
+            sensitive="${" in s["url"],
         ))
 
     out = cfg.get("output", {})
@@ -143,6 +205,7 @@ def load_config(
         per_country=out.get("per_country", True),
         compress=out.get("compress", True),
         compress_level=out.get("compress_level", 9),
+        slim_filename=out.get("slim_filename"),
     )
 
     cache_cfg = cfg.get("cache", {})
@@ -156,11 +219,17 @@ def load_config(
         parallel_downloads=s.get("parallel_downloads", 3),
         retry_delay_seconds=s.get("retry_delay_seconds", 30),
         user_agent=s.get("user_agent", "EPG-Aggregator/1.0"),
+        prune_ended_hours=s.get("prune_ended_hours", 6),
+        min_combined_programmes=s.get("min_combined_programmes", 0),
+        max_programme_drop=s.get("max_programme_drop", 0.5),
+        offset_checks=cfg.get("offset_checks") or [],
     )
 
     with open(channel_map_path) as f:
         cm = yaml.safe_load(f) or {}
-    alias_map: Dict[str, str] = cm.get("mappings") or {}
+    alias_map: Dict[str, str] = {
+        str(k): str(v) for k, v in (cm.get("mappings") or {}).items()
+    }
 
     return sources, output, cache, settings, alias_map
 
@@ -241,7 +310,7 @@ def download_source(
                     LOG.info("[%s] 304 Not Modified — using cache", source.id)
                     return SourceResult(source=source, file_path=cached_path, cached=True, status="cached")
                 LOG.warning("[%s] 304 but no cached file; forcing re-download", source.id)
-                headers = {}
+                headers = {k: v for k, v in headers.items() if k == "User-Agent"}
                 continue
 
             if resp.status_code == 404:
@@ -269,34 +338,34 @@ def download_source(
             else:
                 tmp_path.rename(xml_path)
 
-            etag = resp.headers.get("ETag", "")
-            last_mod = resp.headers.get("Last-Modified", "")
-            if etag or last_mod:
-                cache.save_meta(source.id, etag, last_mod)
-
             # Validate it's actually XML (not an HTML error page served as HTTP 200)
             if not _is_xml(xml_path):
                 size = xml_path.stat().st_size if xml_path.exists() else 0
                 if size == 0:
                     LOG.warning(
                         "[%s] empty 200 response — server likely blocked this "
-                        "User-Agent or IP (set a player user_agent for this source)",
-                        source.id,
+                        "User-Agent or IP", source.id,
                     )
                     last_error = "empty response (0 bytes)"
                 else:
-                    snippet = xml_path.read_bytes()[:120]
-                    LOG.warning("[%s] downloaded content is not XML: %r", source.id, snippet)
+                    LOG.warning("[%s] downloaded content is not XML", source.id)
                     last_error = "response was not valid XML"
                 xml_path.unlink(missing_ok=True)
                 continue
+
+            # Only record validators once the body is known-good, so a bad
+            # response can't pin a later 304 to a missing/invalid cache file.
+            etag = resp.headers.get("ETag", "")
+            last_mod = resp.headers.get("Last-Modified", "")
+            if etag or last_mod:
+                cache.save_meta(source.id, etag, last_mod)
 
             LOG.info("[%s] downloaded %.1fMB", source.id, xml_path.stat().st_size / 1e6)
             return SourceResult(source=source, file_path=xml_path, cached=False, status="ok")
 
         except requests.RequestException as e:
-            last_error = str(e)
-            LOG.warning("[%s] attempt %d failed: %s", source.id, attempt + 1, e)
+            last_error = redact(str(e), source)
+            LOG.warning("[%s] attempt %d failed: %s", source.id, attempt + 1, last_error)
 
     # All attempts failed — try to use stale cache
     stale = cache.get_cached_file(source.id)
@@ -363,12 +432,11 @@ def collect_channels(file_path: Path, source: SourceConfig) -> Dict[str, Channel
                     (dn.text or "", dn.get("lang", ""))
                     for dn in elem.findall("display-name")
                 ]
-                icon = elem.findtext("icon") or None
-                icon_src = elem.find("icon").get("src") if elem.find("icon") is not None else None
+                icon = elem.find("icon")
                 channels[cid] = ChannelData(
                     id=cid,
                     display_names=names,
-                    icon_src=icon_src,
+                    icon_src=icon.get("src") if icon is not None else None,
                     source_id=source.id,
                     country=country_for_channel(cid, source.country),
                 )
@@ -385,13 +453,14 @@ def collect_channels(file_path: Path, source: SourceConfig) -> Dict[str, Channel
 def merge_channel_dicts(
     source_channels: List[Tuple[SourceConfig, Dict[str, ChannelData]]]
 ) -> Dict[str, ChannelData]:
-    # Sort by priority ascending — lower number = higher priority
-    ordered = sorted(source_channels, key=lambda x: x[0].priority)
+    # Lower priority number wins; config order breaks ties so the result never
+    # depends on which download happened to finish first.
+    ordered = sorted(source_channels, key=lambda x: (x[0].priority, x[0].order))
     merged: Dict[str, ChannelData] = {}
     for _source, channels in ordered:
         for cid, ch in channels.items():
             if cid not in merged:
-                merged[cid] = ch  # first (highest priority) wins on collision
+                merged[cid] = ch
     return merged
 
 
@@ -452,26 +521,50 @@ def _shift_xmltv_time(ts: str, hours: int) -> str:
         return ts
 
 
+def parse_xmltv_time(ts: str) -> Optional[datetime]:
+    """Parse an XMLTV timestamp into an aware datetime (missing offset = UTC)."""
+    ts = (ts or "").strip()
+    try:
+        dt = datetime.strptime(ts[:14], "%Y%m%d%H%M%S")
+    except ValueError:
+        return None
+    m = re.fullmatch(r"([+-])(\d{2})(\d{2})", ts[14:].strip())
+    offset = timedelta(0)
+    if m:
+        offset = timedelta(hours=int(m.group(2)), minutes=int(m.group(3)))
+        if m.group(1) == "-":
+            offset = -offset
+    return dt.replace(tzinfo=timezone(offset))
+
+
 def stream_programmes_to_file(
     source_path: Path,
     out,
+    source: SourceConfig,
     valid_channel_ids: Set[str],
     seen_set: Set[Tuple[str, str]],
     alias_reverse: Dict[str, List[str]],
-    time_shift_hours: int = 0,
     claimed_channels: Optional[Set[str]] = None,
     newly_claimed: Optional[Set[str]] = None,
+    prune_before: Optional[datetime] = None,
 ) -> int:
     """Stream <programme> elements from source_path to out for valid channels.
 
-    Channel-level ownership: a channel whose ID is already in
-    ``claimed_channels`` (written by a higher-priority source) is skipped
-    entirely, so a channel's listings come wholly from one source rather than
-    mixing two schedules. IDs this source writes are recorded in
-    ``newly_claimed`` for the caller to fold into ``claimed_channels``.
+    A programme is written under its own channel ID and/or each alias of it,
+    each independently subject to that ID being in ``valid_channel_ids`` — so a
+    per-country or slim file gets an alias's listings even when the canonical
+    epg.pw ID belongs to another country (or is excluded entirely).
+
+    Channel-level ownership: an ID already in ``claimed_channels`` (written by a
+    higher-priority source) is skipped, so a channel's listings come wholly
+    from one source rather than mixing two schedules. IDs this source writes
+    are recorded in ``newly_claimed`` for the caller to fold in.
+
+    Programmes that ended before ``prune_before`` are dropped.
     """
     claimed = claimed_channels or set()
     written = newly_claimed if newly_claimed is not None else set()
+    shift_cache: Dict[str, int] = {}
     count = 0
     try:
         # Use start+end events so we can grab the root and clear it after each
@@ -485,57 +578,61 @@ def stream_programmes_to_file(
                 continue
 
             channel_id = elem.get("channel", "").strip()
+            write_canonical = channel_id in valid_channel_ids and channel_id not in claimed
+            alt_ids = [
+                a for a in alias_reverse.get(channel_id, ())
+                if a in valid_channel_ids and a not in claimed
+            ]
+            if not write_canonical and not alt_ids:
+                root.clear()
+                continue
+
+            # Apply the time shift before dedup/pruning so both use actual
+            # broadcast time. Explicit/pattern per-channel shifts stack on the
+            # source-level shift (e.g. epg.pw's 12xxx batch needs −16 h total).
+            shift = shift_cache.get(channel_id)
+            if shift is None:
+                shift = shift_cache[channel_id] = source.total_shift(channel_id)
             start = elem.get("start", "").strip()
-
-            # Skip channels not wanted, or already owned by a higher-priority source
-            if channel_id not in valid_channel_ids or channel_id in claimed:
-                root.clear()
-                continue
-
-            # Apply time shift before dedup so keys reflect actual broadcast time
-            if time_shift_hours:
-                start = _shift_xmltv_time(start, time_shift_hours)
+            stop = elem.get("stop", "").strip()
+            if shift:
+                start = _shift_xmltv_time(start, shift)
                 elem.set("start", start)
-                stop = elem.get("stop", "").strip()
                 if stop:
-                    elem.set("stop", _shift_xmltv_time(stop, time_shift_hours))
+                    stop = _shift_xmltv_time(stop, shift)
+                    elem.set("stop", stop)
 
-            key = (channel_id, start)
-            if key in seen_set:
-                root.clear()
-                continue
-            seen_set.add(key)
-
-            # Serialise the programme element preserving all child content
-            prog_xml = ET.tostring(elem, encoding="unicode").strip()
-            out.write("  " + prog_xml + "\n")
-            written.add(channel_id)
-            count += 1
-
-            # Emit duplicate entries for alias IDs (unless a higher-priority
-            # source already owns that alias target)
-            for alt_id in alias_reverse.get(channel_id, []):
-                if alt_id in claimed:
+            if prune_before is not None:
+                end = parse_xmltv_time(stop) if stop else parse_xmltv_time(start)
+                if end is not None and end < prune_before:
+                    root.clear()
                     continue
-                alt_key = (alt_id, start)
-                if alt_key not in seen_set:
-                    seen_set.add(alt_key)
-                    # Rewrite channel attribute
-                    alt_xml = prog_xml.replace(
-                        f'channel="{_esc(channel_id)}"',
-                        f'channel="{_esc(alt_id)}"',
-                        1,
-                    )
-                    out.write("  " + alt_xml + "\n")
-                    written.add(alt_id)
-                    count += 1
+
+            prog_xml = ET.tostring(elem, encoding="unicode").strip()
+
+            if write_canonical and (channel_id, start) not in seen_set:
+                seen_set.add((channel_id, start))
+                out.write("  " + prog_xml + "\n")
+                written.add(channel_id)
+                count += 1
+
+            for alt_id in alt_ids:
+                if (alt_id, start) in seen_set:
+                    continue
+                seen_set.add((alt_id, start))
+                alt_xml = prog_xml.replace(
+                    f'channel="{_esc(channel_id)}"',
+                    f'channel="{_esc(alt_id)}"',
+                    1,
+                )
+                out.write("  " + alt_xml + "\n")
+                written.add(alt_id)
+                count += 1
 
             # Drop all accumulated elements from the root to keep memory flat
             root.clear()
-
-            elem.clear()
     except ET.ParseError as e:
-        LOG.warning("[%s] XML parse error in programme pass: %s", source_path, e)
+        LOG.warning("[%s] XML parse error in programme pass: %s", source.id, e)
     return count
 
 
@@ -545,67 +642,173 @@ def write_xmltv_output(
     source_results: List[SourceResult],
     compress: bool,
     compress_level: int,
-    country_filter: Optional[str],
     alias_map: Dict[str, str],
+    include: Optional[Set[str]] = None,
+    prune_before: Optional[datetime] = None,
+    record_stats: bool = False,
 ) -> Tuple[int, int]:
-    """Write a single XMLTV output file. Returns (channel_count, programme_count)."""
-    # Build the set of channel IDs to include
-    if country_filter:
-        filtered_channels = {
-            cid: ch for cid, ch in channels.items()
-            if ch.country == country_filter
-        }
-    else:
-        filtered_channels = channels
+    """Write a single XMLTV output file. Returns (channel_count, programme_count).
 
-    # Build reverse alias map: canonical_id -> [alt_ids]
+    ``include`` limits the file to those channel IDs (None = every channel).
+    ``record_stats`` adds programme counts to each SourceResult — set it for
+    one pass only (the combined file) so metadata isn't multiplied per file.
+    """
+    filtered_channels = (
+        channels if include is None
+        else {cid: ch for cid, ch in channels.items() if cid in include}
+    )
+    valid_ids: Set[str] = set(filtered_channels)
+
+    # Reverse alias map: canonical_id -> [alt_ids]
     alias_reverse: Dict[str, List[str]] = {}
     for alt_id, canonical_id in alias_map.items():
         alias_reverse.setdefault(canonical_id, []).append(alt_id)
 
-    valid_ids: Set[str] = set(filtered_channels.keys())
+    # Canonical IDs whose programmes feed this file (directly or via an alias);
+    # a source carrying none of them is skipped without parsing it.
+    needed = set(valid_ids)
+    for canonical_id, alts in alias_reverse.items():
+        if any(a in valid_ids for a in alts):
+            needed.add(canonical_id)
+
     seen_set: Set[Tuple[str, str]] = set()
     claimed_channels: Set[str] = set()
     now_str = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S +0000")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    open_fn = gzip.open(output_path, "wt", encoding="utf-8", compresslevel=compress_level) if compress else open(output_path, "w", encoding="utf-8")
+    open_fn = (
+        gzip.open(output_path, "wt", encoding="utf-8", compresslevel=compress_level)
+        if compress else open(output_path, "w", encoding="utf-8")
+    )
 
     total_programmes = 0
     with open_fn as out:
         out.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         out.write(f'<tv date="{now_str}" generator-info-name="EPG-Aggregator" generator-info-url="https://github.com/gjhayes/EPG">\n')
 
-        for cid in sorted(filtered_channels.keys()):
+        for cid in sorted(filtered_channels):
             out.write(_channel_xml(filtered_channels[cid]) + "\n")
 
-        # Process sources in priority order so higher-priority programmes win dedup
+        # Sources in (priority, config order) so higher-priority programmes win
+        # ownership/dedup, deterministically.
         sorted_results = sorted(
             [r for r in source_results if r.file_path and r.status != "failed"],
-            key=lambda r: r.source.priority,
+            key=lambda r: (r.source.priority, r.source.order),
         )
         for result in sorted_results:
-            # Single-country sources can be skipped for other countries' files;
-            # multi-country sources (e.g. the provider EPG) must always be read,
-            # with per-channel country filtering handled via valid_ids.
-            if (country_filter and not result.source.multi_country
-                    and result.source.country != country_filter):
+            if result.channel_ids and not (result.channel_ids & needed):
                 continue
             source_written: Set[str] = set()
             n = stream_programmes_to_file(
-                result.file_path, out, valid_ids, seen_set, alias_reverse,
-                time_shift_hours=result.source.time_shift_hours,
+                result.file_path, out, result.source, valid_ids, seen_set,
+                alias_reverse,
                 claimed_channels=claimed_channels,
                 newly_claimed=source_written,
+                prune_before=prune_before,
             )
             claimed_channels |= source_written
-            result.programme_count += n
+            if record_stats:
+                result.programme_count += n
             total_programmes += n
 
         out.write("</tv>\n")
 
     return len(filtered_channels), total_programmes
+
+
+# ── Offset sanity checks ───────────────────────────────────────────────────────
+
+def run_offset_checks(
+    source_results: List[SourceResult],
+    checks: List[dict],
+) -> List[dict]:
+    """Verify time offsets against programmes with a fixed local start time.
+
+    Each check names a source, a raw channel ID, a title substring and the
+    local wall-clock time (in an IANA timezone) at which that programme always
+    starts. The check passes if any matching programme lands on that time after
+    the source's configured shifts — so a change in epg.pw's offsets (or a DST
+    edge we've mis-modelled) shows up as a warning instead of silently
+    shifting everyone's guide.
+    """
+    from zoneinfo import ZoneInfo
+
+    by_id = {r.source.id: r for r in source_results if r.file_path}
+    by_source: Dict[str, List[dict]] = {}
+    for c in checks:
+        by_source.setdefault(c["source"], []).append(c)
+
+    results: List[dict] = []
+    for source_id, group in by_source.items():
+        r = by_id.get(source_id)
+        if r is None:
+            for c in group:
+                results.append({"name": c["name"], "status": "skipped",
+                                "detail": f"source {source_id} unavailable"})
+            continue
+        wanted = {str(c["channel"]) for c in group}
+        seen: Dict[str, List[Tuple[datetime, str]]] = {}
+        try:
+            for _ev, elem in ET.iterparse(str(r.file_path), events=("end",)):
+                if elem.tag == "programme":
+                    cid = elem.get("channel", "")
+                    if cid in wanted:
+                        start = parse_xmltv_time(
+                            _shift_xmltv_time(elem.get("start", ""), r.source.total_shift(cid)))
+                        if start:
+                            seen.setdefault(cid, []).append((start, elem.findtext("title") or ""))
+                    elem.clear()
+                elif elem.tag == "channel":
+                    elem.clear()
+        except ET.ParseError as e:
+            LOG.warning("[%s] parse error during offset checks: %s", source_id, e)
+
+        for c in group:
+            tz = ZoneInfo(c["timezone"])
+            want_hm = c["local_time"]
+            needle = c["title_contains"].lower()
+            cands = [(s, t) for s, t in seen.get(str(c["channel"]), []) if needle in t.lower()]
+            if not cands:
+                results.append({"name": c["name"], "status": "skipped",
+                                "detail": "no matching programmes in feed window"})
+                continue
+            local = sorted({s.astimezone(tz).strftime("%H:%M") for s, _ in cands})
+            ok = want_hm in local
+            results.append({
+                "name": c["name"],
+                "status": "pass" if ok else "fail",
+                "detail": f"expected {want_hm} {c['timezone']}; saw {', '.join(local[:8])}",
+            })
+    return results
+
+
+# ── Output sanity gate ─────────────────────────────────────────────────────────
+
+def sanity_problem(
+    combined_programmes: int,
+    settings: Settings,
+    previous_metadata: Optional[Path],
+) -> Optional[str]:
+    """Return a reason not to deploy this build, or None if it looks healthy."""
+    if combined_programmes < settings.min_combined_programmes:
+        return (f"combined feed has {combined_programmes} programmes, below the "
+                f"floor of {settings.min_combined_programmes}")
+    if previous_metadata and previous_metadata.exists():
+        try:
+            prev = json.loads(previous_metadata.read_text())
+            prev_files = {f["filename"]: f for f in prev.get("output_files", [])}
+            prev_n = next(
+                (f["programmes"] for name, f in prev_files.items()
+                 if name.startswith("epg.xml")), None)
+        except Exception as e:
+            LOG.warning("could not read previous metadata (%s); skipping drop check", e)
+            prev_n = None
+        if prev_n:
+            floor = int(prev_n * (1 - settings.max_programme_drop))
+            if combined_programmes < floor:
+                return (f"combined feed dropped to {combined_programmes} programmes from "
+                        f"{prev_n} last deploy (more than {settings.max_programme_drop:.0%})")
+    return None
 
 
 # ── HTML status page ───────────────────────────────────────────────────────────
@@ -615,15 +818,17 @@ def generate_status_html(
     base_url: str,
     output_path: Path,
 ) -> None:
+    e = html.escape
     files = metadata.get("output_files", [])
     sources = metadata.get("sources", [])
+    checks = metadata.get("offset_checks", [])
     generated_at = metadata.get("generated_at", "")
+    base = base_url.rstrip("/")
 
     rows_files = ""
     for f in files:
-        url = f"{base_url.rstrip('/')}/{f['filename']}"
         rows_files += (
-            f'<tr><td><a href="{url}">{f["filename"]}</a></td>'
+            f'<tr><td><a href="{e(base)}/{e(f["filename"])}">{e(f["filename"])}</a></td>'
             f'<td>{f["channels"]:,}</td>'
             f'<td>{f["programmes"]:,}</td>'
             f'<td>{f["size_mb"]:.1f} MB</td></tr>\n'
@@ -633,16 +838,26 @@ def generate_status_html(
     for s in sources:
         status_cls = "ok" if s["status"] in ("ok", "cached") else "fail"
         rows_sources += (
-            f'<tr class="{status_cls}"><td>{s["id"]}</td>'
-            f'<td>{s["country"]}</td>'
-            f'<td>{s["status"]}</td>'
+            f'<tr class="{status_cls}"><td>{e(s["id"])}</td>'
+            f'<td>{e(s["country"])}</td>'
+            f'<td>{e(s["status"])}</td>'
             f'<td>{s["channels"]:,}</td>'
-            f'<td>{s.get("error", "")}</td></tr>\n'
+            f'<td>{e(s.get("error", ""))}</td></tr>\n'
         )
 
-    tivimate_url = f"{base_url.rstrip('/')}/epg.xml.gz"
+    rows_checks = ""
+    for c in checks:
+        cls = {"pass": "ok", "fail": "fail"}.get(c["status"], "")
+        rows_checks += (
+            f'<tr class="{cls}"><td>{e(c["name"])}</td><td>{e(c["status"])}</td>'
+            f'<td>{e(c["detail"])}</td></tr>\n'
+        )
 
-    html = f"""<!DOCTYPE html>
+    slim = next((f["filename"] for f in files if "slim" in f["filename"]), None)
+    combined = next((f["filename"] for f in files if f["filename"].startswith("epg.xml")), "epg.xml.gz")
+    recommend = f"{base}/{slim or combined}"
+
+    page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -661,17 +876,24 @@ tr.fail td{{color:#c0392b}}
 </head>
 <body>
 <h1>EPG Aggregator</h1>
-<p>Last updated: <strong>{generated_at}</strong></p>
+<p>Last updated: <strong>{e(generated_at)}</strong></p>
 
 <h2>TiviMate Setup</h2>
 <p>In TiviMate: <em>Settings → EPG Sources → Add</em> and paste this URL:</p>
-<div class="url-box">{tivimate_url}</div>
-<p>Or use individual country files below for a smaller download.</p>
+<div class="url-box">{e(recommend)}</div>
+<p>The slim feed contains only channels mapped to the strong8k playlist. Use
+<code>{e(combined)}</code> for every channel, or a per-country file below.</p>
 
 <h2>Output Files</h2>
 <table>
 <tr><th>File</th><th>Channels</th><th>Programmes</th><th>Size</th></tr>
 {rows_files}
+</table>
+
+<h2>Time-offset Checks</h2>
+<table>
+<tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+{rows_checks}
 </table>
 
 <h2>Source Health</h2>
@@ -682,16 +904,16 @@ tr.fail td{{color:#c0392b}}
 </body>
 </html>
 """
-    output_path.write_text(html, encoding="utf-8")
+    output_path.write_text(page, encoding="utf-8")
 
 
-def write_metadata_json(
-    output_dir: Path,
+def build_metadata(
     source_results: List[SourceResult],
     output_files: list,
+    offset_checks: List[dict],
     generated_at: str,
-) -> None:
-    data = {
+) -> dict:
+    return {
         "generated_at": generated_at,
         "sources": [
             {
@@ -702,13 +924,13 @@ def write_metadata_json(
                 "channels": r.channel_count,
                 "programmes": r.programme_count,
                 "cached": r.cached,
-                "error": r.error,
+                "error": redact(r.error, r.source),
             }
             for r in source_results
         ],
         "output_files": output_files,
+        "offset_checks": offset_checks,
     }
-    (output_dir / "metadata.json").write_text(json.dumps(data, indent=2))
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -717,11 +939,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Merge EPG sources into XMLTV files")
     parser.add_argument("--config", default="config/sources.yaml")
     parser.add_argument("--channel-map", default="config/channel_map.yaml")
+    parser.add_argument("--manual-epg", default="config/manual_epg.xml",
+                        help="Optional local XMLTV file merged verbatim into every output "
+                             "(no time-shift) for events no upstream source labels")
     parser.add_argument("--output-dir", default="output")
     parser.add_argument("--cache-dir", default=None, help="Override cache dir from config")
     parser.add_argument("--countries", default=None, help="Comma-separated country codes to process")
     parser.add_argument("--no-compress", action="store_true")
     parser.add_argument("--force-download", action="store_true")
+    parser.add_argument("--previous-metadata", default=None,
+                        help="metadata.json from the last deploy; refuse to finish if the "
+                             "combined programme count collapsed (see settings.max_programme_drop)")
+    parser.add_argument("--allow-drop", action="store_true",
+                        help="Skip the programme-count sanity gate")
     parser.add_argument("--log-level", default="INFO")
     args = parser.parse_args()
 
@@ -729,8 +959,11 @@ def main() -> int:
         level=getattr(logging, args.log_level.upper(), logging.INFO),
         format="%(asctime)s %(levelname)s %(message)s",
     )
+    # urllib3 logs full request URLs (incl. credentials) at DEBUG.
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
     force = args.force_download or os.environ.get("FORCE_DOWNLOAD", "").lower() == "true"
+    allow_drop = args.allow_drop or os.environ.get("ALLOW_DROP", "").lower() == "true"
 
     sources, output_cfg, cache_cfg, settings, alias_map = load_config(
         args.config, args.channel_map
@@ -775,13 +1008,36 @@ def main() -> int:
                 result.source.id, result.status, result.cached, result.error or "-"
             )
 
+    # ── Manual EPG overlay ─────────────────────────────────────────────────────
+    # A local XMLTV file merged verbatim (no time-shift) as a highest-priority
+    # pseudo-source, so its channels win ownership and its programmes are written
+    # first. Used for events no upstream feed labels (e.g. a provider stream with
+    # no tvg-id / no guide). Its channels carry dotted country suffixes so they
+    # route into the correct per-country files via the normal pipeline.
+    manual_path = Path(args.manual_epg) if args.manual_epg else None
+    if manual_path and manual_path.exists() and _is_xml(manual_path):
+        manual_src = SourceConfig(
+            id=MANUAL_SOURCE_ID, name="Manual EPG overlay", url=str(manual_path),
+            country="ALL", priority=0, enabled=True, timeout=0, retry=0,
+            time_shift_hours=0, multi_country=True, order=-1,
+        )
+        source_results.append(SourceResult(
+            source=manual_src, file_path=manual_path, cached=False, status="ok",
+        ))
+        LOG.info("[%s] merging overlay from %s", MANUAL_SOURCE_ID, manual_path)
+    elif args.manual_epg:
+        LOG.info("[%s] no overlay file at %s (skipping)", MANUAL_SOURCE_ID, args.manual_epg)
+
+    # Deterministic order regardless of download completion order.
+    source_results.sort(key=lambda r: (r.source.priority, r.source.order))
+
     # ── Collect channels from all successful sources ───────────────────────────
     source_channels: List[Tuple[SourceConfig, Dict[str, ChannelData]]] = []
     for result in source_results:
         if result.file_path:
-            LOG.info("[%s] collecting channels...", result.source.id)
             ch = collect_channels(result.file_path, result.source)
             result.channel_count = len(ch)
+            result.channel_ids = set(ch)
             LOG.info("[%s] found %d channels", result.source.id, len(ch))
             source_channels.append((result.source, ch))
 
@@ -789,29 +1045,53 @@ def main() -> int:
     all_channels = apply_channel_aliases(all_channels, alias_map)
     LOG.info("Total merged channels: %d", len(all_channels))
 
+    missing_targets = sorted({c for c in alias_map.values() if c not in all_channels})
+    if missing_targets:
+        LOG.warning("%d channel_map targets not present in any source: %s",
+                    len(missing_targets), ", ".join(missing_targets[:20]))
+
+    prune_before = (
+        datetime.now(timezone.utc) - timedelta(hours=settings.prune_ended_hours)
+        if settings.prune_ended_hours is not None else None
+    )
+
     # ── Write output files ─────────────────────────────────────────────────────
     compress = output_cfg.compress and not args.no_compress
     ext = ".gz" if compress else ""
     output_files = []
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-    # Combined output
-    combined_path = output_dir / output_cfg.combined_filename
-    LOG.info("Writing combined output -> %s", combined_path)
-    ch_count, prog_count = write_xmltv_output(
-        combined_path, all_channels, source_results,
-        compress, output_cfg.compress_level,
-        country_filter=None,
-        alias_map=alias_map,
-    )
-    size_mb = combined_path.stat().st_size / 1e6
-    output_files.append({
-        "filename": combined_path.name,
-        "channels": ch_count,
-        "programmes": prog_count,
-        "size_mb": round(size_mb, 2),
-    })
-    LOG.info("Combined: %d channels, %d programmes, %.1fMB", ch_count, prog_count, size_mb)
+    def write(path: Path, include: Optional[Set[str]], label: str, stats: bool = False):
+        LOG.info("Writing %s -> %s", label, path)
+        ch_count, prog_count = write_xmltv_output(
+            path, all_channels, source_results, compress, output_cfg.compress_level,
+            alias_map=alias_map, include=include, prune_before=prune_before,
+            record_stats=stats,
+        )
+        size_mb = path.stat().st_size / 1e6
+        output_files.append({
+            "filename": path.name,
+            "channels": ch_count,
+            "programmes": prog_count,
+            "size_mb": round(size_mb, 2),
+        })
+        LOG.info("%s: %d channels, %d programmes, %.1fMB", label, ch_count, prog_count, size_mb)
+        return prog_count
+
+    combined_name = output_cfg.combined_filename
+    if not compress and combined_name.endswith(".gz"):
+        combined_name = combined_name[:-3]
+    combined_programmes = write(output_dir / combined_name, None, "combined", stats=True)
+
+    # Slim feed: only the IDs the strong8k playlist uses (channel_map aliases)
+    # plus manual-overlay channels — a fraction of the size for TiviMate.
+    if output_cfg.slim_filename:
+        slim_ids = {a for a in alias_map if a in all_channels}
+        slim_ids |= {cid for cid, ch in all_channels.items() if ch.source_id == MANUAL_SOURCE_ID}
+        slim_name = output_cfg.slim_filename
+        if not compress and slim_name.endswith(".gz"):
+            slim_name = slim_name[:-3]
+        write(output_dir / slim_name, slim_ids, "slim")
 
     # Per-country outputs — derive the country set from the actual channels
     # (their dotted-ID suffix / source country) rather than source.country, so
@@ -823,46 +1103,39 @@ def main() -> int:
         if country_filter_set:
             countries = [c for c in countries if c in country_filter_set]
         for country in countries:
-            fname = f"epg_{country}.xml{ext}"
-            country_path = output_dir / fname
-            LOG.info("Writing %s -> %s", country, country_path)
-            ch_count, prog_count = write_xmltv_output(
-                country_path, all_channels, source_results,
-                compress, output_cfg.compress_level,
-                country_filter=country,
-                alias_map=alias_map,
-            )
-            size_mb = country_path.stat().st_size / 1e6
-            output_files.append({
-                "filename": fname,
-                "channels": ch_count,
-                "programmes": prog_count,
-                "size_mb": round(size_mb, 2),
-            })
-            LOG.info("%s: %d channels, %d programmes, %.1fMB", country, ch_count, prog_count, size_mb)
+            ids = {cid for cid, ch in all_channels.items() if ch.country == country}
+            write(output_dir / f"epg_{country}.xml{ext}", ids, country)
+
+    # ── Offset checks ──────────────────────────────────────────────────────────
+    checks = run_offset_checks(source_results, settings.offset_checks)
+    in_actions = os.environ.get("GITHUB_ACTIONS") == "true"
+    for c in checks:
+        LOG.info("offset check [%s] %s — %s", c["status"], c["name"], c["detail"])
+        if c["status"] == "fail" and in_actions:
+            print(f"::warning title=EPG offset check failed::{c['name']}: {c['detail']}")
 
     # ── Status page and metadata ───────────────────────────────────────────────
     base_url = "https://gjhayes.github.io/EPG"
-    write_metadata_json(output_dir, source_results, output_files, generated_at)
-    generate_status_html(
-        {"generated_at": generated_at, "sources": [
-            {"id": r.source.id, "name": r.source.name, "country": r.source.country,
-             "status": r.status, "channels": r.channel_count, "error": r.error}
-            for r in source_results
-        ], "output_files": output_files},
-        base_url,
-        output_dir / "index.html",
-    )
+    metadata = build_metadata(source_results, output_files, checks, generated_at)
+    (output_dir / "metadata.json").write_text(json.dumps(metadata, indent=2))
+    generate_status_html(metadata, base_url, output_dir / "index.html")
 
-    # Summary — warn about failures but only hard-fail if combined output is empty
-    failed = [r for r in source_results if r.status == "failed" and not r.cached]
+    failed = [r for r in source_results if r.status == "failed"]
     if failed:
         LOG.warning("Failed sources (skipped): %s", [r.source.id for r in failed])
 
-    combined_entry = next((f for f in output_files if f["filename"] == output_cfg.combined_filename), None)
-    if combined_entry and combined_entry["channels"] == 0:
-        LOG.error("Combined output has 0 channels — all sources failed")
+    if not all_channels or combined_programmes == 0:
+        LOG.error("Combined output is empty — all sources failed")
         return 1
+
+    problem = None if allow_drop else sanity_problem(
+        combined_programmes, settings,
+        Path(args.previous_metadata) if args.previous_metadata else None,
+    )
+    if problem:
+        LOG.error("Refusing to publish: %s (re-run with --allow-drop / ALLOW_DROP=true "
+                  "if this is expected)", problem)
+        return 3
 
     LOG.info("Done. Output written to %s/", output_dir)
     return 0

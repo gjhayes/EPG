@@ -1,122 +1,117 @@
 # EPG Aggregator
 
-Automatically aggregates XMLTV Electronic Program Guide data from multiple sources for use with TiviMate and strong8k IPTV. Runs every 6 hours via GitHub Actions and deploys to GitHub Pages.
+Aggregates XMLTV guide data for TiviMate with a strong8k IPTV subscription.
+Pulls epg.pw for Australia, UK, US and Canada, corrects epg.pw's time offsets,
+maps the provider's channel IDs onto epg.pw's, and publishes to GitHub Pages
+every 6 hours.
 
-## Coverage
+Status page (source health, offset checks, file sizes): **https://gjhayes.github.io/EPG/**
 
-| Country | Sources |
+## TiviMate setup
+
+Use two EPG sources, in this priority order:
+
+1. **Your provider's EPG** (strong8k Xtream `xmltv.php` URL) — accurate and has
+   live sports (Fox Sports, F1, AFL…). Add it in TiviMate directly; it can't be
+   fetched from GitHub because the provider blocks GitHub's IPs.
+2. **This feed** — fills the channels the provider EPG leaves empty:
+
+```
+https://gjhayes.github.io/EPG/epg_slim.xml.gz
+```
+
+`epg_slim` contains only channels mapped to the strong8k playlist (~0.8 MB),
+so it refreshes quickly. Set refresh to 12–24 hours.
+
+Other files:
+
+| File | Contents |
 |---|---|
-| Australia | epg.pw (FTA + Foxtel/pay-TV) |
-| United Kingdom | epg.pw |
-| United States | epg.pw |
-| Canada | epg.pw |
+| `epg_slim.xml.gz` | Mapped strong8k channels + manual overlay (recommended) |
+| `epg.xml.gz` | Every channel from every source (~13 MB) |
+| `epg_AU` / `epg_GB` (`epg_UK`) / `epg_US` / `epg_CA` `.xml.gz` | Per country |
 
-## TiviMate / IPTV App Setup
+Plain `.xml` copies are published for files under GitHub's 100 MB limit.
 
-1. Open your IPTV app → **EPG Sources** → **Add**
-2. Paste this URL (gzip — works in TiviMate and most apps):
+## How times are corrected
 
-```
-https://gjhayes.github.io/EPG/epg.xml.gz
-```
+epg.pw labels every programme `+0000`, but the times are really UTC+8 (China
+time, no DST), so each epg.pw source has `time_shift_hours: -8`. Its 5-digit
+`12xxx` channel IDs (GB feed only: Sky, E4, More4, BBC regions, CNBC…) are
+converted twice and need a further −8 h, applied by the
+`per_channel_shift_patterns` rule on `epg_pw_gb`.
 
-The combined feed is published gzip-only (the uncompressed file exceeds
-GitHub's 100MB limit). Per-country files are also published as plain XML for
-apps that can't read gzip — see the table below.
+Every build re-verifies this against programmes with fixed local start times
+(`offset_checks` in `config/sources.yaml`, e.g. BBC News at 18:00 UK, ABC News
+at 19:00 Sydney). A failure shows as a warning on the Actions run and on the
+status page.
 
-3. Set the refresh interval to **12 hours** or **daily**
-4. Force a refresh — TiviMate will download and index all channels
+## Channel mapping
 
-Individual country files:
+`config/channel_map.yaml` maps the playlist's dotted IDs (`SkyAtlantic.uk`) to
+epg.pw numeric IDs (`12366`). Each mapping duplicates the channel and its
+programmes under the playlist ID. The build log lists any mapping whose target
+has disappeared from epg.pw ("channel_map targets not present").
 
-| Country | Plain XML | Gzip |
-|---|---|---|
-| Australia | `https://gjhayes.github.io/EPG/epg_AU.xml` | `epg_AU.xml.gz` |
-| United Kingdom | `https://gjhayes.github.io/EPG/epg_GB.xml` | `epg_GB.xml.gz` |
-| United States | `https://gjhayes.github.io/EPG/epg_US.xml` | `epg_US.xml.gz` |
-| Canada | `https://gjhayes.github.io/EPG/epg_CA.xml` | `epg_CA.xml.gz` |
+Some channels are deliberately unmapped (e.g. Fox Sports AU) because epg.pw only
+has placeholder listings for them — mapping them would mask the provider EPG.
 
-## Channel ID Troubleshooting
+To add a mapping: find the channel's `tvg-id` in the M3U, find the matching
+`<channel id="...">` in `epg.xml.gz`, add `"tvg-id": "epg.pw id"`, and push.
 
-If channels in TiviMate show no guide data after matching:
+## Manual overlay (events no source lists)
 
-1. Download your strong8k M3U playlist
-2. Find `tvg-id=` attributes — e.g. `tvg-id="3474"` or `tvg-id="ABCNews.au"`
-3. Download `epg_AU.xml.gz` and search for `<channel id="...">`
-4. If they don't match, edit `config/channel_map.yaml`:
+`config/manual_epg.xml` is a hand-written XMLTV file merged into every output
+with top priority and no time shift — for a stream with no guide anywhere
+(e.g. an overflow sports channel during a tournament). Its channels are always
+in the slim feed. In TiviMate, long-press the stream → Edit → EPG → pick the
+overlay channel. Ended programmes are pruned automatically; delete finished
+events so the channel disappears. See the comment in the file for the format.
 
-```yaml
-mappings:
-  "ABCNews.au": "3474"
-  "FoxSports1.au": "3520"
-```
+## Deploy safety
 
-5. Commit and push — the next workflow run will generate duplicate entries for both IDs.
+The workflow:
 
-## Status Page
+- runs the test suite first;
+- refuses to publish if the combined feed is below `min_combined_programmes`
+  or dropped by more than `max_programme_drop` versus the last deploy (dispatch
+  manually with `allow_drop=true` if a drop is expected);
+- redacts URLs/credentials from errors written to logs, `metadata.json` and the
+  status page;
+- deploys gh-pages as a single orphan commit, so history doesn't grow.
 
-Live source health and file listing: **https://gjhayes.github.io/EPG/**
+The schedule runs on the **default branch (`main`)** — changes on other
+branches only go live until the next scheduled run, so merge to `main`.
 
-## First-Time Setup
+## Provider EPG via GitHub (disabled)
 
-After cloning or forking this repo:
+`xtream_provider` in `config/sources.yaml` can pull the provider EPG from the
+`XTREAM_EPG_URL` repository secret, but the provider blocks GitHub-hosted
+runners, so it's `enabled: false`. It would work on a self-hosted runner.
 
-1. Go to **Settings → Pages** → Source: **Deploy from a branch** → Branch: `gh-pages` / `/ (root)`
-2. *(Recommended)* Add the provider EPG secret — see below
-3. Go to **Actions** → **Update EPG Data** → **Run workflow** → set `force_download=true`
-4. Wait ~10-15 minutes for the first run to complete and Pages to activate
-5. Add the URL to TiviMate
-
-### Provider EPG secret (primary source)
-
-The **primary** EPG source is your IPTV provider's own Xtream guide. It is correct
-for every channel (no time-offset issues), includes live-sports listings that no
-free EPG carries, and matches channels automatically (same IDs as your M3U).
-epg.pw is kept only as a **fallback** for channels the provider EPG doesn't cover.
-
-Add your provider's full XMLTV URL as a repository secret so it never appears in
-the code or output:
-
-1. **Settings → Secrets and variables → Actions → New repository secret**
-2. Name: `XTREAM_EPG_URL`
-3. Value: `http://YOUR_HOST/xmltv.php?username=YOUR_USER&password=YOUR_PASS`
-
-If the secret is **not** set, the build automatically falls back to epg.pw alone
-(channel guide times for some channels may be off, and live-sports channels will
-show "No listing available").
-
-> Note: GitHub Actions runners must be able to reach your provider's host. Some
-> providers block datacenter IPs; if the `xtream_provider` source shows `failed`
-> on the status page, the build still works via the epg.pw fallback.
-
-## Local Testing
+## Local run
 
 ```bash
-pip install -r scripts/requirements.txt
-python scripts/merge_epg.py \
-  --config config/sources.yaml \
-  --channel-map config/channel_map.yaml \
-  --output-dir ./output \
-  --cache-dir scripts/.cache \
-  --countries AU,GB \
-  --log-level DEBUG
+pip install -r scripts/requirements-dev.txt
+python -m pytest -q tests
+python scripts/merge_epg.py --output-dir ./output --log-level INFO
+# options: --countries AU,GB  --no-compress  --force-download
+#          --previous-metadata metadata.json  --allow-drop
 ```
 
-Add `--force-download` to bypass the ETag cache on first run.
-
-## Adding More Sources
-
-Edit `config/sources.yaml` and add a new entry:
+## Adding a source
 
 ```yaml
-- id: my_new_source
+- id: my_source
   name: "My Source"
   url: "https://example.com/epg.xml"
   country: AU
-  priority: 3        # higher number = lower priority
+  priority: 3          # lower number wins channel ownership
   enabled: true
   timeout: 120
   retry: 3
+  time_shift_hours: 0
 ```
 
-The script handles 404s and network failures gracefully — a failed source is skipped and the rest still produce output.
+A source that 404s, times out or serves non-XML is skipped (falling back to its
+last cached copy if one exists); the rest still publish.
