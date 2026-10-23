@@ -4,7 +4,15 @@
 # Each alias generates a duplicate <channel> + <programme> set in the output.
 #
 # Auto-generated via fuzzy name matching (thefuzz token_sort_ratio >= 78)
-# with manual overrides for key channels. Coverage: 473/831 target channels.
+# with manual overrides for key channels. 441 of the 831 M3U channels mapped.
+#
+# Pruned Oct 2026: mappings whose epg.pw ID vanished were re-pointed to a live
+# equivalent where one exists, otherwise removed. Deliberately absent: Fox
+# Sports AU and other channels epg.pw only ever served placeholder listings
+# for — leave them to the provider EPG in TiviMate. The build logs any target
+# that disappears from epg.pw ("channel_map targets not present").
+#
+# 12xxx targets are fine to use: the GB source applies the extra −8 h they need.
 #
 # To add more: find tvg-id= in your M3U, locate matching <channel id="..."> in
 # the EPG XML, and add the mapping below.
@@ -19,7 +27,6 @@ mappings:
   "ABC.au": "3357"
   "ABCME.au": "3269"
   "ACCNetwork.us": "464879"
-  "AFNSports.us": "496764"
   "AMC.ca": "465158"
   "AMC.uk": "465158"
   "AMC.us": "465158"
@@ -65,13 +72,12 @@ mappings:
   "BigTenNetwork.us": "465073"
   "Blaze.uk": "9176"
   "BlazeTV.us": "496610"
-  "BloombergTV.uk": "446954"
   "Boomerang.uk": "464755"
   "Boomerang.us": "464755"
   "BounceTV.us": "465292"
   "Bravo.us": "40901"
   "CBAT.ca": "470499"
-  "CBC.ca": "447032"
+  "CBC.ca": "470595"
   "CBCNews.ca": "486748"
   "CBCOttawa.ca": "470498"
   "CBCT.ca": "470762"
@@ -88,10 +94,9 @@ mappings:
   "CITV.uk": "470406"
   "CMT.ca": "470407"
   "CMT.us": "470407"
-  "CNBC.uk": "447032"
-  "CNBC.us": "447032"
+  "CNBC.uk": "12291"
+  "CNBC.us": "464791"
   "CNBCWorld.us": "465282"
-  "CTVComedy.ca": "446977"
   "CanalD.ca": "470527"
   "CanalEvasion.ca": "470428"
   "CanalVie.ca": "470682"
@@ -118,8 +123,8 @@ mappings:
   "CookingChannel.ca": "465211"
   "CookingChannel.us": "465211"
   "CottageLife.ca": "470647"
-  "CourtTV.uk": "486725"
-  "CourtTV.us": "486725"
+  "CourtTV.uk": "465226"
+  "CourtTV.us": "465226"
   "CoziTV.us": "464930"
   "Crave1.ca": "470505"
   "Crave2.ca": "470445"
@@ -140,7 +145,6 @@ mappings:
   "DiscoveryLife.us": "12185"
   "DiscoveryScience.ca": "9307"
   "DiscoveryScience.uk": "9307"
-  "DiscoveryTurbo.uk": "446996"
   "DisneyChannel.ca": "465349"
   "DisneyChannel.uk": "465349"
   "DisneyJunior.ca": "465320"
@@ -171,14 +175,14 @@ mappings:
   "FoxBusiness.us": "464766"
   "FoxDeportes.us": "465156"
   "FoxSoccerPlus.us": "465214"
-  "FoxSports2.us": "496765"
+  "FoxSports2.us": "465355"
   # FoxSports3/5/6/News.au removed — epg.pw has only "No listing available"
   # for these channels (447015/447007/446961/447006). Keeping them here would
   # block TiviMate from using the Xtream provider EPG's real Fox Sports data.
   "Freeform.us": "465331"
   "FrissonsTV.ca": "470882"
   "FuboSportsNetwork.us": "464937"
-  "GBNews.uk": "446999"
+  "GBNews.uk": "12133"
   "GOLD.uk": "12021"
   "GameShowNetwork.us": "470638"
   "GemsTV.uk": "459688"
@@ -188,7 +192,7 @@ mappings:
   "GolfChannel.us": "470741"
   "GreatMovies.uk": "486848"
   "Grit.us": "465117"
-  "HBOComedy.us": "446977"
+  "HBOComedy.us": "464953"
   "HBOLatino.us": "464960"
   "HBOSignature.us": "465279"
   "HBOZone.us": "465104"
@@ -236,7 +240,7 @@ mappings:
   "Logo.us": "465367"
   "LoveWorld.us": "9306"
   "MLBNetwork.us": "465239"
-  "MSNBC.ca": "447005"
+  "MSNBC.ca": "465087"
   "MTV.ca": "12559"
   "MTV.us": "12559"
   "MTV2.ca": "12559"
@@ -249,7 +253,6 @@ mappings:
   "MonumentalSportsNetwork.us": "465347"
   "More4.uk": "12164"
   "MotorTrend.us": "465084"
-  "MovieMax.us": "496766"
   "MoviePlex.us": "465074"
   "MovieTime.ca": "470683"
   "Movies4Men.uk": "486711"
@@ -296,14 +299,11 @@ mappings:
   "Really.uk": "9500"
   "Revolt.us": "465207"
   "RootSportsNorthwest.us": "465136"
-  "S4C.uk": "9559"
+  "S4C.uk": "12378"
   "SBS.au": "442912"
   "SBSFood.au": "442908"
   "SBSViceland.au": "442911"
   "SBSWorldMovies.au": "442910"
-  "SKYNewsLive.au": "446982"
-  "SKYRacing.au": "447013"
-  "SKYRacing2.au": "447012"
   "STV.uk": "350685"
   "ScreenPixAction.us": "464775"
   "ScreenPixVoices.us": "465412"
@@ -349,7 +349,6 @@ mappings:
   "SportsnetPacific.ca": "470732"
   "SportsnetWest.ca": "470443"
   "SportsnetWorld.ca": "470811"
-  "StartTV.us": "12067"
   "Starz.us": "470670"
   "StarzCinema.us": "465115"
   "StarzComedy.us": "464979"
@@ -370,7 +369,7 @@ mappings:
   "SuperEcran4.ca": "470588"
   "Syfy.uk": "465053"
   "TFO.ca": "470598"
-  "TLC.uk": "446966"
+  "TLC.uk": "12163"
   "TNTSport1.uk": "400477"
   "TNTSport2.uk": "400480"
   "TNTSport3.uk": "400479"
@@ -421,7 +420,7 @@ mappings:
   "itv3.uk": "486726"
   "itv4.uk": "486853"
   "itvquiz.uk": "486821"
-  "msnbc.us": "447005"
+  "msnbc.us": "465087"
   "mtv.uk": "12559"
   "natgeowild.ca": "9300"
   "nickelodeon.uk": "12084"
@@ -457,7 +456,6 @@ mappings:
   "skywitness.uk": "12518"
   "sonytv.uk": "12503"
   "talksport.uk": "9405"
-  "tlc.ca": "446966"
   "tntsports1.uk": "400477"
   "tntsports2.uk": "400480"
   "tntsports3.uk": "400479"
