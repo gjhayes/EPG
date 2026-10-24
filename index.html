@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPG Status</title>
+<style>
+body{font-family:sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem}
+h1{color:#333}
+table{border-collapse:collapse;width:100%;margin-bottom:2rem}
+th,td{border:1px solid #ddd;padding:.5rem .75rem;text-align:left}
+th{background:#f5f5f5}
+tr.ok td{color:#2d7d2d}
+tr.fail td{color:#c0392b}
+.url-box{background:#f0f0f0;padding:.75rem 1rem;border-radius:4px;font-family:monospace;word-break:break-all}
+</style>
+</head>
+<body>
+<h1>EPG Aggregator</h1>
+<p>Last updated: <strong>2026-10-24 15:01:00 UTC</strong></p>
+
+<h2>TiviMate Setup</h2>
+<p>In TiviMate: <em>Settings → EPG Sources → Add</em> and paste this URL:</p>
+<div class="url-box">https://gjhayes.github.io/EPG/epg_slim.xml.gz</div>
+<p>The slim feed contains only channels mapped to the strong8k playlist. Use
+<code>epg.xml.gz</code> for every channel, or a per-country file below.</p>
+
+<h2>Output Files</h2>
+<table>
+<tr><th>File</th><th>Channels</th><th>Programmes</th><th>Size</th></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg.xml.gz">epg.xml.gz</a></td><td>7,585</td><td>52,987</td><td>2.3 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_slim.xml.gz">epg_slim.xml.gz</a></td><td>441</td><td>7,044</td><td>0.3 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_AU.xml.gz">epg_AU.xml.gz</a></td><td>213</td><td>13,513</td><td>0.4 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_CA.xml.gz">epg_CA.xml.gz</a></td><td>798</td><td>8,658</td><td>0.5 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_GB.xml.gz">epg_GB.xml.gz</a></td><td>942</td><td>21,784</td><td>1.0 MB</td></tr>
+<tr><td><a href="https://gjhayes.github.io/EPG/epg_US.xml.gz">epg_US.xml.gz</a></td><td>5,632</td><td>9,032</td><td>0.4 MB</td></tr>
+
+</table>
+
+<h2>Time-offset Checks</h2>
+<table>
+<tr><th>Check</th><th>Result</th><th>Detail</th></tr>
+<tr class="ok"><td>GB base batch — BBC One: BBC News 18:00 UK</td><td>pass</td><td>expected 18:00 Europe/London; saw 18:00, 22:00</td></tr>
+<tr class="ok"><td>GB 12xxx batch — BBC One London: BBC News 18:00 UK</td><td>pass</td><td>expected 18:00 Europe/London; saw 00:45, 01:35, 06:00, 12:00, 13:00, 17:00, 17:25, 18:00</td></tr>
+<tr class="ok"><td>GB 12xxx batch — CNBC: Squawk on the Street 09:00 ET</td><td>pass</td><td>expected 09:00 America/New_York; saw 09:00, 09:30, 10:00, 10:30, 11:00, 11:30</td></tr>
+<tr class="ok"><td>AU — ABC TV: ABC News 19:00 Sydney</td><td>pass</td><td>expected 19:00 Australia/Sydney; saw 09:00, 12:00, 19:00</td></tr>
+<tr class=""><td>US — CNBC: Squawk on the Street 09:00 ET</td><td>skipped</td><td>no matching programmes in feed window</td></tr>
+
+</table>
+
+<h2>Source Health</h2>
+<table>
+<tr><th>Source</th><th>Country</th><th>Status</th><th>Channels</th><th>Error</th></tr>
+<tr class="ok"><td>manual_overlay</td><td>ALL</td><td>ok</td><td>0</td><td></td></tr>
+<tr class="ok"><td>epg_pw_au</td><td>AU</td><td>cached</td><td>203</td><td></td></tr>
+<tr class="ok"><td>epg_pw_gb</td><td>GB</td><td>cached</td><td>752</td><td></td></tr>
+<tr class="ok"><td>epg_pw_us</td><td>US</td><td>cached</td><td>5,493</td><td></td></tr>
+<tr class="ok"><td>epg_pw_ca</td><td>CA</td><td>cached</td><td>696</td><td></td></tr>
+
+</table>
+</body>
+</html>
