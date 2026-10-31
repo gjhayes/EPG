@@ -1,0 +1,120 @@
+{
+  "generated_at": "2026-10-31 20:46:07 UTC",
+  "sources": [
+    {
+      "id": "manual_overlay",
+      "name": "Manual EPG overlay",
+      "country": "ALL",
+      "status": "ok",
+      "channels": 0,
+      "programmes": 0,
+      "cached": false,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_au",
+      "name": "epg.pw Australia",
+      "country": "AU",
+      "status": "cached",
+      "channels": 204,
+      "programmes": 12837,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_gb",
+      "name": "epg.pw United Kingdom",
+      "country": "GB",
+      "status": "cached",
+      "channels": 754,
+      "programmes": 38839,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_us",
+      "name": "epg.pw United States",
+      "country": "US",
+      "status": "cached",
+      "channels": 5542,
+      "programmes": 253186,
+      "cached": true,
+      "error": ""
+    },
+    {
+      "id": "epg_pw_ca",
+      "name": "epg.pw Canada",
+      "country": "CA",
+      "status": "cached",
+      "channels": 696,
+      "programmes": 37271,
+      "cached": true,
+      "error": ""
+    }
+  ],
+  "output_files": [
+    {
+      "filename": "epg.xml.gz",
+      "channels": 7637,
+      "programmes": 342133,
+      "size_mb": 18.33
+    },
+    {
+      "filename": "epg_slim.xml.gz",
+      "channels": 441,
+      "programmes": 20850,
+      "size_mb": 1.03
+    },
+    {
+      "filename": "epg_AU.xml.gz",
+      "channels": 214,
+      "programmes": 12705,
+      "size_mb": 0.42
+    },
+    {
+      "filename": "epg_CA.xml.gz",
+      "channels": 798,
+      "programmes": 37410,
+      "size_mb": 1.92
+    },
+    {
+      "filename": "epg_GB.xml.gz",
+      "channels": 944,
+      "programmes": 38343,
+      "size_mb": 1.7
+    },
+    {
+      "filename": "epg_US.xml.gz",
+      "channels": 5681,
+      "programmes": 253675,
+      "size_mb": 14.5
+    }
+  ],
+  "offset_checks": [
+    {
+      "name": "GB base batch \u2014 BBC One: BBC News 18:00 UK",
+      "status": "pass",
+      "detail": "expected 18:00 Europe/London; saw 00:45, 02:05, 06:00, 13:00, 17:15, 17:25, 18:00, 22:00"
+    },
+    {
+      "name": "GB 12xxx batch \u2014 BBC One London: BBC News 18:00 UK",
+      "status": "pass",
+      "detail": "expected 18:00 Europe/London; saw 00:45, 02:05, 06:00, 13:00, 17:15, 17:25, 18:00, 22:00"
+    },
+    {
+      "name": "GB 12xxx batch \u2014 CNBC: Squawk on the Street 09:00 ET",
+      "status": "pass",
+      "detail": "expected 09:00 America/New_York; saw 09:00, 09:30, 10:00, 10:30, 11:00, 11:30"
+    },
+    {
+      "name": "AU \u2014 ABC TV: ABC News 19:00 Sydney",
+      "status": "pass",
+      "detail": "expected 19:00 Australia/Sydney; saw 09:00, 12:00, 19:00"
+    },
+    {
+      "name": "US \u2014 CNBC: Squawk on the Street 09:00 ET",
+      "status": "skipped",
+      "detail": "no matching programmes in feed window"
+    }
+  ]
+}
